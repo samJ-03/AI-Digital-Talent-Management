@@ -29,3 +29,7 @@ bootstrap只证明运行时和Linux引擎可用，不等于数据库、语义索
     .venv\Scripts\python.exe scripts/verify_http.py
 
 Compose入口显式加载本项目.env。仅操作ai-talent-dev命名空间，不改动其他项目。服务协议验证与模型/OCR/业务质量验收分开。
+
+## Local accounts
+
+After migrations, run `python scripts/bootstrap_local.py` once. It creates an administrator and two department HR accounts with random passwords; no fixed default passwords. The generated credentials stay in ignored `.execution/local-accounts.json`; never commit or share this file. Bootstrap refuses existing accounts and never resets them. `python scripts/verify_identity_http.py` verifies login/logout and role separation through the local proxy without printing credentials. Production requires HTTPS trusted origins and secure cookies.

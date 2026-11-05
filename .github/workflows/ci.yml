@@ -5,7 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TALENT_TEST_DATABASE_URL: mysql+pymysql://talent:ci-only-ephemeral@127.0.0.1:3306/talent_test?charset=utf8mb4
+      TALENT_REDIS_URL: redis://127.0.0.1:6379/0
     services:
+      redis:
+        image: redis@sha256:8da19c7399dca900c6822a1cf30f9d2285585e2c4b457ff4095b0f4500054d3f
+        ports: ['6379:6379']
+        options: --health-cmd="redis-cli ping" --health-interval=5s --health-retries=20
       mysql:
         image: mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
         env:

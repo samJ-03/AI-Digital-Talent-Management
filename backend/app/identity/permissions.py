@@ -1,0 +1,3 @@
+ADMIN_PERMISSIONS=frozenset({'user.manage','role.manage','department.manage','model.manage','prompt.manage','workflow.manage','mail_config.manage','runtime.read','audit.read','system.read'})
+HR_PERMISSIONS=frozenset({'job.read','job.write','import.read','import.write','talent.read','talent.write','profile.read','profile.write','evaluation.read','evaluation.write','question.read','question.write','paper.read','paper.write','exam.read','exam.invite','exam.review','recruitment.read','recruitment.write','knowledge.read','knowledge.write','report.read','training.read'})
+PERMISSIONS=ADMIN_PERMISSIONS|HR_PERMISSIONS

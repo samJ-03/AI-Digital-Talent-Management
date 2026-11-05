@@ -13,16 +13,23 @@ from app.core.errors import DomainError
 from app.core.types import ApiEnvelope, HealthView, ReadinessView, MonitorContext
 from app.core.readiness import InfrastructureProbe
 
+from app.identity.router import IdentityRuntime, identity_router
+from app.core.request_context import request_id_context
+
 logger = logging.getLogger('talent.api')
 
 def create_app(settings: Settings) -> FastAPI:
     probe = InfrastructureProbe(settings)
+    identity = IdentityRuntime(settings)
     @asynccontextmanager
     async def lifespan(app):
         yield
         probe.close()
+        identity.close()
     app = FastAPI(title='AI数字化人才平台', version='0.1.0', lifespan=lifespan, docs_url='/docs' if settings.environment != 'production' else None)
     app.state.readiness_probe = probe.check
+    app.state.identity = identity
+    app.include_router(identity_router())
 
     @app.middleware('http')
     async def request_identity(request: Request, call_next):
@@ -31,10 +38,16 @@ def create_app(settings: Settings) -> FastAPI:
         except ValueError:
             request_id = str(uuid4())
         request.state.request_id = request_id
-        response = await call_next(request)
+        context_token=request_id_context.set(request_id)
+        try:
+            response = await call_next(request)
+        finally:
+            request_id_context.reset(context_token)
         response.headers['X-Request-ID'] = request_id
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
+        if request.url.path.startswith(('/api/v1/auth/','/api/v1/admin/')):
+            response.headers['Cache-Control']='no-store'
         return response
 
     def error_response(request: Request, status: int, code: str, message: str, data=None):
