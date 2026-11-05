@@ -2,6 +2,8 @@
 
 2026-11-05；根据用户最新指示更新。本文只记录安全元数据，不包含密钥或连接密码。
 
+当前状态：已从追加授权目录发现百炼北京接入域名；DeepSeek 官方 Key 仍未找到。下方旧“地域待确认”项由文末最新补查结果取代。
+
 ## 用户选择与核对结果
 
 - 授权读取并择需复用的来源：D:/Wolin_Project/Yue-Education/.env。只读，未修改源文件；不得整份复制旧项目环境。
@@ -43,3 +45,15 @@ PostgreSQL 的 JSONB/索引等能力适合此类系统，但本项目没有必�
 
 1. DeepSeek 走官方还是已提供的第三方代理（已发起问题）。如走官方，只需提供本地 Key 配置位置，不在聊天中粘贴密钥。
 2. 百炼服务地域/实际 API endpoint，必要时 workspace 信息；原 env 无该配置。没有此信息时暂不执行云端请求。
+
+
+## 最新补查结果：rag_examples（2026-11-05）
+
+用户追加授权检查 D:/wolin_learn-master/rag_examples/.env 及该目录配置代码。只读检查 .env、.env.example 与相关源代码，未显示或复制密钥，未执行旧项目代码，未发送模型 API 请求。
+
+- .env 仍无 DEEPSEEK_API_KEY，.env.example 也未声明该项；DEEPSEEK_API_KEY 只在教程说明出现，不能当成可用凭据。OPENAI_BASE_URL 仍为 https://api.openai-proxy.org/v1，不能据此假定官方 deepseek-flash 已可用。该目录的 DASHSCOPE_API_KEY 与代理 Key 和先前指定项目分别相同；比较只记录相等性，不保存值或指纹。
+- 找到百炼配置依据：0201_document_parse/mineru_parser.py、02_document_chunking/03_ai_chunking.py、04_summary_chunking.py、03_retrieval_methods/02_vector_search.py 中有 https://dashscope.aliyuncs.com/compatible-mode/v1。这是北京地域旧共享域名，官方文档确认目前仍可使用。故“缺少百炼地区/endpoint”不再需要用户补充；下一步可用该已发现地址进行合成输入连通验证，尚不能声称 Key 认证成功。
+- embedding_examples/aliyun_embedding.py 使用 DashScope SDK 的 TextEmbedding.call，未覆盖 base_http_api_url；其中 ALIYUN_API_KEY 被明确作为模型调用的 api_key 使用。这提供了用途证据，但与 DASHSCOPE_API_KEY 是不同值，不能无记录地混用或自动尝试所有 Key。后续只为指定适配器映射明确选定的来源变量。
+- 现阶段仍缺 DeepSeek 官方凭据或对代理渠道的明确选择。用户可将官方 Key 配置到本地文件并仅提供路径；不要在聊天中粘贴 Key。此项只阻塞相应模型接入，不阻塞 T06/T07。
+
+官方地域/域名说明：https://help.aliyun.com/zh/model-studio/base-url
