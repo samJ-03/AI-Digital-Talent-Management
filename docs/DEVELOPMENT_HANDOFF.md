@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：用户询问断联/换 agent 续接与凭据确认，保存检查点。
+更新：2026-11-05；状态：继续开发；T06 已验证，下一任务 T07。
 
 ## 1. 从这里继续
 
@@ -22,28 +22,22 @@
 |T03 40表与迁移|完成|1df51c0；478列、迁移往返、乐观锁、开发库无漂移|
 |T04 权限/审计/幂等|完成|0ca1833；当时完整测试55通过|
 |T05 后台账号管理|完成|f8aee3a；当前最近完整测试74通过|
-|T06 持久任务与恢复|进行中、未提交|23项任务+幂等组合测试已通过；尚缺授权查询接口、实际 Worker/Scheduler Compose 接线及真实队列验收、完整回归|
+|T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07～T43|未完成|按详细计划和依赖推进；生产发布需单独授权|
 
-最新完整测试：artifacts/t05-final-suite.log，74 passed。
-最新局部测试：artifacts/t06-composed-suite.log，23 passed。
-T06 的23通过不能当作当前全项目已回归。不要将 T06 勾选完成，不要声称招聘业务已跑通。
+最新完整测试：artifacts/t06-final-suite.log，93 passed。
+真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
+不要声称招聘业务已跑通；当前完成的是基础设施、账号和任务框架。
 证据报告：artifacts/t01-*～t05-*；执行流水：.execution/progress.md；任务摘录：.execution/T04-brief.md、T05-brief.md、T06-brief.md。
 artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录。未推送远端；本机磁盘损坏不在这些本地记录的保障范围内。
 
-## 3. 当前未提交工作与下一步
+## 3. 当前工作与下一步
 
-未提交：backend/app/core/uow.py、core/idempotency.py、tests/integration/test_idempotency.py，以及 runtime/job_service.py、outbox.py、scheduler.py、worker.py 和 tests/integration/test_outbox.py。
+T06 已完成，详细变更与结果见 artifacts/t06-verification.md。先检查实际 git status/log，保护任何新出现的未提交修改。
 
-已验证的修复：IdempotencyService 的禁止回调 commit 机制误拦内部 SAVEPOINT release。现在用 UoW.savepoint 仅授权内部 release，仍禁止回调提交外层事务；实际组合测试已通过。
+继续 T07：私有文件、上传格式/大小/页数校验、MinIO 真实读写、按领域关联授权下载、过期孤儿清理。先读详细计划 T07 与数据库/接口文档；写失败测试，再实现并验证。之后依赖顺序推进 T08 等；DeepSeek 官方 Key 或明确代理渠道仍待用户提供，不重复询问已找到的百炼北京地址。模型缺项只阻塞对应实际接入，不阻塞基础模块。
 
-继续顺序：
-1. 检查 git status/diff 和上述文件；检查是否有被中断后仍运行的进程。
-2. 完成 T06 RuntimeQueries.task 和 GET /api/v1/tasks/{id}，关联实体按部门/共享事实鉴权；管理员仅技术状态，不能读取简历/答卷内容。
-3. Compose 加入独立 Linux Celery worker 与单实例 scheduler；单实例用 MySQL 连接级 advisory lock 保证，不能只靠约定。
-4. 通过真实 Redis/Celery/DB 诊断任务证明投递与完成；不把技术诊断当作招聘业务实现。
-5. 补充恢复/授权边界验证，运行当前完整套件；保存报告，检查 diff 后提交 T06，再勾选清单。
-6. 接着 T07 文件与后续任务。真实模型、OCR 和邮件送达尚未完成，必须按计划验收。
+T06 约定：worker只有固定 handler 注册表，当前业务 handler 尚未实现；system.verify 仅技术诊断。外部慢 I/O 不能凭任务租约假定可任意提交业务结果，应在落库时验证任务租约/版本与领域幂等。API098 HR-only；管理员另用后续脱敏runtime，不能借task接口读私有业务结果。
 
 ## 4. 运行环境和命令
 

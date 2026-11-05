@@ -15,6 +15,7 @@ from app.core.readiness import InfrastructureProbe
 
 from app.identity.router import IdentityRuntime, identity_router
 from app.core.request_context import request_id_context
+from app.runtime.router import router as runtime_router
 
 logger = logging.getLogger('talent.api')
 
@@ -30,6 +31,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.readiness_probe = probe.check
     app.state.identity = identity
     app.include_router(identity_router())
+    app.include_router(runtime_router)
 
     @app.middleware('http')
     async def request_identity(request: Request, call_next):

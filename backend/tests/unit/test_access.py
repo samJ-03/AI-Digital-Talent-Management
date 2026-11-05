@@ -42,3 +42,9 @@ def test_clock_is_utc_and_frozen_clock_rejects_naive():
     instant=datetime(2026,11,5,2,0,tzinfo=timezone.utc)
     assert FrozenClock(instant).now()==instant
     with pytest.raises(ValueError): FrozenClock(datetime(2026,11,5))
+
+
+def test_company_knowledge_is_shared_without_private_department_bypass():
+    actor=ActorContext('hr',user_id=1,department_ids=frozenset({10}),permissions=frozenset({'knowledge.read'}))
+    AccessPolicy().require(actor,'knowledge.read',ResourceScope('knowledge',id=2,shared=True))
+    with pytest.raises(PermissionDenied): AccessPolicy().require(actor,'knowledge.read',ResourceScope('knowledge',id=2,department_id=20,shared=True))

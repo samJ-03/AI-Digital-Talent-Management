@@ -42,7 +42,7 @@ class IdempotencyService:
             fresh=True
             try:
                 # The unique insert serializes duplicates until the winning outer transaction ends.
-                with session.begin_nested():
+                with uow.savepoint():
                     session.add(record)
                     session.flush()
             except IntegrityError as error:
@@ -68,6 +68,8 @@ class IdempotencyService:
                 record.expires_at=now+timedelta(hours=24)
             transaction=session.get_transaction()
             def forbid_commit(session):
+                approved=session.info.get('approved_savepoint')
+                if approved is not None and session.get_nested_transaction() is approved: return
                 raise RuntimeError('callback cannot commit')
             event.listen(session,'before_commit',forbid_commit)
             try:

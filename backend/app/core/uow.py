@@ -1,5 +1,6 @@
 from __future__ import annotations
 from functools import lru_cache
+from contextlib import contextmanager
 from typing import Callable
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -20,6 +21,26 @@ class SqlAlchemyUow:
         if self.session is None:
             raise RuntimeError('Unit of work is not active')
         self.session.commit()
+
+    @contextmanager
+    def savepoint(self):
+        if self.session is None:
+            raise RuntimeError('Unit of work is not active')
+        nested=self.session.begin_nested()
+        try:
+            yield nested
+        except BaseException:
+            nested.rollback()
+            raise
+        else:
+            # Permit only this internal SAVEPOINT release, never an outer command commit.
+            previous=self.session.info.get('approved_savepoint')
+            self.session.info['approved_savepoint']=nested
+            try:
+                nested.commit()
+            finally:
+                if previous is None: self.session.info.pop('approved_savepoint',None)
+                else: self.session.info['approved_savepoint']=previous
 
     def rollback(self) -> None:
         if self.session is not None:

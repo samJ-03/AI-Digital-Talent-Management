@@ -147,3 +147,14 @@ def test_same_key_is_isolated_per_actor(db):
     first=svc.execute(ActorContext('hr',user_id=101),uid,'key',digest('a'),writer(uid))
     second=svc.execute(ActorContext('hr',user_id=102),uid,'key',digest('b'),writer(uid+'-other'))
     assert first.entity_id!=second.entity_id
+
+
+def test_callback_cannot_commit_outer_transaction_inside_savepoint(db):
+    svc,factory,actor,uid=db
+    def bad(uow):
+        with uow.savepoint():
+            result=writer(uid)(uow)
+            uow.session.commit()
+        return result
+    with pytest.raises(RuntimeError,match='callback cannot commit'): svc.execute(actor,uid,'key',digest('a'),bad)
+    with factory() as s: assert s.scalar(select(func.count()).select_from(Department).where(Department.name==uid))==0

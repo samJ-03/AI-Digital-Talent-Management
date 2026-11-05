@@ -97,7 +97,7 @@ services:
   api:
     image: ai-talent-api:dev
     build: {context: .., dockerfile: backend/Dockerfile}
-    environment:
+    environment: &app-environment
       TALENT_ENVIRONMENT: dev
       TALENT_DATABASE_URL: ${TALENT_DATABASE_URL:?required}
       TALENT_TEST_DATABASE_URL: ${TALENT_TEST_DATABASE_URL:?required}
@@ -106,7 +106,7 @@ services:
       TALENT_MINIO_USER: ${TALENT_MINIO_USER:?required}
       TALENT_MINIO_PASSWORD: ${TALENT_MINIO_PASSWORD:?required}
     ports: ["127.0.0.1:18080:8000"]
-    volumes: [../backend:/app/backend:ro, ../scripts:/app/scripts:ro]
+    volumes: &app-volumes [../backend:/app/backend:ro, ../scripts:/app/scripts:ro]
     depends_on:
       mysql: {condition: service_healthy}
       redis: {condition: service_healthy}
@@ -116,6 +116,38 @@ services:
       timeout: 3s
       retries: 20
     mem_limit: 768m
+  worker:
+    image: ai-talent-api:dev
+    environment: *app-environment
+    volumes: *app-volumes
+    command: [celery, -A, 'app.runtime.worker:celery_app', worker, --loglevel=WARNING, --concurrency=1, --without-gossip, --without-mingle]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -m, app.runtime.health, worker]
+      interval: 15s
+      timeout: 8s
+      retries: 10
+      start_period: 10s
+    stop_grace_period: 30s
+    mem_limit: 768m
+  scheduler:
+    image: ai-talent-api:dev
+    environment: *app-environment
+    volumes: *app-volumes
+    command: [python, -m, app.runtime.scheduler]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -m, app.runtime.health, scheduler]
+      interval: 15s
+      timeout: 8s
+      retries: 10
+      start_period: 10s
+    stop_grace_period: 10s
+    mem_limit: 256m
   frontend:
     image: ai-talent-frontend:dev
     build: {context: .., dockerfile: frontend/Dockerfile}

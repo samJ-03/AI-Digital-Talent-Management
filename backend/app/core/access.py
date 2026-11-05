@@ -46,7 +46,7 @@ class PermissionDenied(DomainError):
         super().__init__('PERMISSION_DENIED',403,'无操作权限')
 
 class AccessPolicy:
-    SHARED_KINDS = frozenset({'talent','candidate','resume','profile'})
+    SHARED_KINDS = frozenset({'talent','candidate','resume','profile','knowledge'})
     ADMIN_PREFIXES = frozenset({'user','role','department','model','prompt','workflow','mail_config','runtime','audit','system'})
     CANDIDATE_PERMISSIONS = frozenset({'exam.access','exam.start','exam.read','exam.answer','exam.submit','exam.status'})
 
