@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：T10已验证；下一项T09网关实现，真实DeepSeek验收仍缺凭据。
+更新：2026-11-05；状态：官方deepseek-flash接通；继续T09网关实现与业务质量验证。
 
 ## 1. 从这里继续
 
@@ -25,7 +25,7 @@
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
 |T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
-|T09|未完成|实现和真实LLM验收仍待推进；官方Key/明确代理授权未提供|
+|T09|未完成|官方Key已配置，deepseek-flash最小JSON通过；网关/固定图/业务质量验收仍待实现|
 |T10 邮件配置和发送适配器|完成|完整149通过；本地Celery→SMTP→Mailpit真实收件并激活配置1；企业SMTP未接入|
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
 |T12～T43|未完成|按依赖推进，生产发布需单独授权|
@@ -42,17 +42,17 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 T06 已提交42794f3，T07 已提交fa55a2f。T08已完成验收，见artifacts/t08-verification.md；先检查git实际日志/未提交修改，不覆盖新工作。
 
-T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。T10现已完成：完整149通过，本地Mailpit测试接入已激活；下一步T09网关实现，真实DeepSeek测试仍缺凭据。T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09真实DeepSeek缺官方Key或明确代理授权，不能伪造验收。
+T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。T10现已完成：完整149通过，本地Mailpit测试接入已激活；下一步T09网关实现；官方deepseek-flash已通过最小JSON检查，不再缺凭据。T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09网关与业务质量验收仍未完成，不能用官方连接成功替代。
 
 用户要求减少token：只读当前任务摘录和相关文件，输出摘要；保留有意义RED/GREEN和任务末完整回归，避免无变化重复检查；不用未授权的子agent。原审批曾因额度失败，用户现已明确继续，正常审批已恢复；不要绕过审批。
 
 T08实现约定：provider_type仍是ollama/compatible_http，官方 URL+model allowlist 决定实际适配；不自动允许 api.openai-proxy.org。七个固定流程由0003_fixed_workflows迁移创建且默认关闭。提示词发布自身调用IdempotencyService，幂等键由服务构造参数从HTTP传入。模型测试只用合成输入；cloud model_digest=None，不能把model ID当作权重摘要。加密主密钥保留主项目.env，恢复加密数据库时必须一并保留。
 
-凭据事实：旧DASHSCOPE_API_KEY是占位项；已根据旧TextEmbedding代码的明确引用，复用授权文件ALIYUN_API_KEY到主项目.env的TALENT_DASHSCOPE_API_KEY。真实embedding鉴权1024维成功。不要再盲选占位项或重复询问百炼地域。DeepSeek官方Key仍缺。
+凭据事实：旧DASHSCOPE_API_KEY是占位项；已根据旧TextEmbedding代码的明确引用，复用授权文件ALIYUN_API_KEY到主项目.env的TALENT_DASHSCOPE_API_KEY。真实embedding鉴权1024维成功。不要再盲选占位项或重复询问百炼地域。DeepSeek官方Key现已从新增授权根.env配置并通过合成JSON检查。
 
 从T08起 .execution/publish.py 排除.env；不要用旧缓存覆盖主项目私有环境。临时staging已去掉用户模型Key与加密主密钥，仅主项目.env持有配置；源文件从未改动。Standalone default_session_factory初始化时加载全部40ORM表，回归测试使用新进程且显式设置backend PYTHONPATH。
 
-后续边界：Word渲染后100页/完整图像解码与OCR留T13，单批50留T14。API099为鉴权附件流，FileService.attach须在领域调用方同一UoW保存关联。任务Worker固定处理器，当前仅system.verify技术诊断；外部副作用必须有领域幂等/租约隔离，不能把技术诊断当招聘验收。
+后续边界：Word渲染后100页/完整图像解码与OCR留T13，单批50留T14。API099为鉴权附件流，FileService.attach须在领域调用方同一UoW保存关联。任务Worker固定处理器，当前已有system.verify及mail.test，其他业务处理器待逐任务注册；外部副作用必须有领域幂等/租约隔离，不能把技术诊断当招聘验收。
 
 ## 4. 运行环境和命令
 
@@ -94,3 +94,8 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 ### T10续接注意
 
 Worker现在支持受控handler.prepare(lease)→原子finalize；邮件测试在SMTP前持久化processing标记，崩溃/超时后unknown终态，不自动重发。TerminalJobFailure可与领域状态同事务提交。服务端停用/切换SMTP只处理尚未发送pending通知为failed，mail_config_id不改。SMTP延迟connect要设置经过验证的_host用于Python3.11 SNI，证书检查始终启用。0004仅放宽数据库允许none，服务策略只准本地Mailpit。API094最小脱敏任务报告已提前提供，T28再补完整读取层。
+
+
+### 最新官方模型续接
+
+DEEPSEEK_API_KEY来源D:/wolin_learn-master/.env已明确授权且成功；主项目.env变量TALENT_DEEPSEEK_API_KEY。官方config3（logical_key deepseek-flash）能力verified，JSON成功；不要再询问/扫描其他Key，不用第三方代理。只做了最小协议检查，T09仍未完成。测试证据deepseek-official-capability.json、deepseek-config-regression.log（10通过），最近完整主线测试仍为149通过。下一步按 .execution/T09-brief.md（暂在staging，已复制到主仓库）实现gateway、graphs、校验和真实业务样本。

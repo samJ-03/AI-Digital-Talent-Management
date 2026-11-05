@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     database_url: SecretStr
     redis_url: SecretStr
     allowed_smtp_hosts: list[str] = ['mailpit']
+    deepseek_api_key: SecretStr | None = None
     dashscope_api_key: SecretStr | None = None
     encryption_key: SecretStr | None = None
     minio_endpoint: str = 'minio:9000'

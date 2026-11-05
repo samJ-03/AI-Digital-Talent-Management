@@ -109,6 +109,7 @@ services:
       TALENT_MINIO_BUCKET: ${TALENT_MINIO_BUCKET:-talent-business}
       TALENT_ENCRYPTION_KEY: ${TALENT_ENCRYPTION_KEY:-}
       TALENT_DASHSCOPE_API_KEY: ${TALENT_DASHSCOPE_API_KEY:-}
+      TALENT_DEEPSEEK_API_KEY: ${TALENT_DEEPSEEK_API_KEY:-}
     ports: ["127.0.0.1:18080:8000"]
     volumes: &app-volumes [../backend:/app/backend:ro, ../scripts:/app/scripts:ro]
     depends_on:

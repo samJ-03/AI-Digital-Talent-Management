@@ -2,7 +2,7 @@
 
 2026-11-05；根据用户最新指示更新。本文只记录安全元数据，不包含密钥或连接密码。
 
-当前状态：百炼 text-embedding-v3 已用授权来源中的 ALIYUN_API_KEY 通过真实鉴权并返回1024维；DASHSCOPE_API_KEY 是占位项。DeepSeek 官方 Key 仍未找到。文末最新验证结果取代较早“尚未调用/Key待验证/地域待确认”的历史记录。
+当前状态：DeepSeek官方deepseek-flash最小合成JSON调用成功（config3）；百炼text-embedding-v3真实鉴权1024维已通过。下方早期“缺少Key”记录是历史状态，以文末最新接入记录为准。
 
 ## 用户选择与核对结果
 
@@ -66,3 +66,8 @@ PostgreSQL 的 JSONB/索引等能力适合此类系统，但本项目没有必�
 - 实际北京接口调用成功：模型 text-embedding-v3、两条合成短文本、返回1024维，未发送真实简历；证据 code/ai-talent/artifacts/t08-live-dashscope.json。云端权重 digest 无法获取，保留None；不虚构模型版本锁定。
 - provider_type 沿用已评审的 ollama/compatible_http；受控兼容HTTP适配根据允许的官方地址与模型ID派生 deepseek/dashscope，不扩大数据库 provider 枚举。
 - 七个固定流程由迁移初始化且默认关闭。T08 配置接口完成不等于 T09 真实 LLM 输出质量或 T20 rerank 验收完成。DeepSeek 官方 Key/明确代理选择仍缺少，暂不调用 DeepSeek。
+
+
+## 最新 DeepSeek 官方接入（2026-11-05）
+
+用户新增授权来源 D:/wolin_learn-master/.env，已找到非占位 DEEPSEEK_API_KEY。仅将这一项映射到主项目忽略文件 .env 的 TALENT_DEEPSEEK_API_KEY，源文件未修改，代理配置及其他凭据未复制，staging不保留该Key。官方地址 https://api.deepseek.com/v1；一次最小合成JSON检查成功，请求与返回model均为deepseek-flash，配置ID3已加密保存且能力检查通过。证据 artifacts/deepseek-official-capability.json；相关回归10通过。未发送真实简历，未使用第三方代理。T09网关、固定图与真实招聘业务质量验收尚未完成，不能仅据连接成功勾选T09完成。后续不再重复询问Key或调用渠道。
