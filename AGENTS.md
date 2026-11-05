@@ -6,7 +6,7 @@ This repository implements the user-approved AI digital talent platform. Before 
 - The handoff records the last verified checkpoint; inspect actual code and rerun the relevant checks before claiming completion.
 - Keep the plan, a current handoff checkpoint and per-task verification evidence updated at each completed task, material failure or intentional stop. Do not put secrets in records.
 - User authorized development and local reversible checks. Do not repeatedly ask permission for that scope. Do not deploy, push, send external recruitment email, or configure paid/model credentials without the relevant user authorization.
-- No model vendor/model/API credential has been confirmed at this checkpoint. Confirm before actual model integration; do not scan or reuse existing keys. Follow the matching credential skill when applicable.
+- Latest model intent and credential-source authorization are recorded in docs/MODEL_AND_DATABASE_DECISION.md. User selected DeepSeek deepseek-flash and DashScope embedding/rerank. Await DeepSeek official-vs-proxy channel and DashScope region/endpoint. Do not repeat resolved questions, send proxy keys to another host, copy whole old env files, or scan other credential locations.
 - Local .env and .execution/local-accounts.json contain generated project credentials. Never print, commit or copy them into documentation. Do not touch other projects' containers or databases.
 - SQL migrations/destructive tests run only on isolated talent_test. Preserve talent_dev and existing host databases.
 - Output goes to this Obsidian project directory. The original D:/AI数字化人才平台-相关文档 is reference material and temporary staging only.
