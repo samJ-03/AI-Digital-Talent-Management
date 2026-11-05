@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：继续开发；T08 已验证；T09 的真实 LLM 仍缺凭据，可先推进已满足依赖的 HR 业务任务。
+更新：2026-11-05；状态：T11已验证，下一项T10邮件配置；T09真实LLM缺凭据。
 
 ## 1. 从这里继续
 
@@ -25,9 +25,11 @@
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
 |T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
-|T09～T43|未完成|T09真实LLM缺凭据；可继续独立任务。生产发布需单独授权|
+|T09、T10|未完成|T09真实LLM缺凭据；下一项先推进T10邮件配置|
+|T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
+|T12～T43|未完成|按依赖推进，生产发布需单独授权|
 
-最新完整测试：artifacts/t08-final-suite.log，126 passed。
+最新完整测试：artifacts/t11-final-suite.log，137 passed。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
 不要声称招聘业务已跑通；当前完成的是基础设施、账号和任务框架。
@@ -38,7 +40,9 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 T06 已提交42794f3，T07 已提交fa55a2f。T08已完成验收，见artifacts/t08-verification.md；先检查git实际日志/未提交修改，不覆盖新工作。
 
-下一步可先推进 T11 题库与不可变岗位试卷、T12 岗位版本（依赖 T05/T04，均已满足），补核心 HR 业务。T09 网关实现可以继续，但真正的 DeepSeek LLM 质量验收仍缺官方 Key 或明确代理渠道授权，不能标完成；T10邮件配置依赖已满足也可按计划推进。不要把模型凭据缺项当作所有开发的阻塞。
+T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。下一步先T10邮件配置（T05/T06/T08已满足）；T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09真实DeepSeek缺官方Key或明确代理授权，不能伪造验收。
+
+用户要求减少token：只读当前任务摘录和相关文件，输出摘要；保留有意义RED/GREEN和任务末完整回归，避免无变化重复检查；不用未授权的子agent。原审批曾因额度失败，用户现已明确继续，正常审批已恢复；不要绕过审批。
 
 T08实现约定：provider_type仍是ollama/compatible_http，官方 URL+model allowlist 决定实际适配；不自动允许 api.openai-proxy.org。七个固定流程由0003_fixed_workflows迁移创建且默认关闭。提示词发布自身调用IdempotencyService，幂等键由服务构造参数从HTTP传入。模型测试只用合成输入；cloud model_digest=None，不能把model ID当作权重摘要。加密主密钥保留主项目.env，恢复加密数据库时必须一并保留。
 
