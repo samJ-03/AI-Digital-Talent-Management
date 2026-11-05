@@ -19,3 +19,4 @@ email-validator>=2,<3
 argon2-cffi>=25,<26
 cryptography>=46,<48
 pytest==8.4.2
+jsonschema>=4.23,<5

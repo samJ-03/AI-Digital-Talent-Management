@@ -58,6 +58,8 @@ class SqlAlchemyUow:
 
 @lru_cache(maxsize=1)
 def default_session_factory():
+    from app.models import register_models
+    register_models()
     settings=Settings.load()
     engine=create_engine(settings.database_url.get_secret_value(),pool_pre_ping=True,pool_recycle=1800,connect_args={'connect_timeout':5})
     return sessionmaker(bind=engine,expire_on_commit=False)

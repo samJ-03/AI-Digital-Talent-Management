@@ -2,7 +2,7 @@
 
 2026-11-05；根据用户最新指示更新。本文只记录安全元数据，不包含密钥或连接密码。
 
-当前状态：已从追加授权目录发现百炼北京接入域名；DeepSeek 官方 Key 仍未找到。下方旧“地域待确认”项由文末最新补查结果取代。
+当前状态：百炼 text-embedding-v3 已用授权来源中的 ALIYUN_API_KEY 通过真实鉴权并返回1024维；DASHSCOPE_API_KEY 是占位项。DeepSeek 官方 Key 仍未找到。文末最新验证结果取代较早“尚未调用/Key待验证/地域待确认”的历史记录。
 
 ## 用户选择与核对结果
 
@@ -57,3 +57,12 @@ PostgreSQL 的 JSONB/索引等能力适合此类系统，但本项目没有必�
 - 现阶段仍缺 DeepSeek 官方凭据或对代理渠道的明确选择。用户可将官方 Key 配置到本地文件并仅提供路径；不要在聊天中粘贴 Key。此项只阻塞相应模型接入，不阻塞 T06/T07。
 
 官方地域/域名说明：https://help.aliyun.com/zh/model-studio/base-url
+
+
+## 最新实际验证与凭据选择（T08 完成）
+
+- 进一步区分字段存在和凭据可用：授权文件里的 DASHSCOPE_API_KEY 是占位项。旧 embedding_examples/aliyun_embedding.py 明确将 ALIYUN_API_KEY 作为 DashScope TextEmbedding.api_key 使用；据此选取该非占位项，而非把云账号凭据按名字猜成模型 Key。
+- 已仅把选中的模型 Key 映射到本项目忽略文件 .env 的 TALENT_DASHSCOPE_API_KEY。源文件未修改，其他账号/代理 Key 未复制。加密主密钥由本项目随机生成并保留在主项目 .env，数据库只存加密值。临时 staging 的 .env 不含此用户 Key；同步脚本从此排除 .env。
+- 实际北京接口调用成功：模型 text-embedding-v3、两条合成短文本、返回1024维，未发送真实简历；证据 code/ai-talent/artifacts/t08-live-dashscope.json。云端权重 digest 无法获取，保留None；不虚构模型版本锁定。
+- provider_type 沿用已评审的 ollama/compatible_http；受控兼容HTTP适配根据允许的官方地址与模型ID派生 deepseek/dashscope，不扩大数据库 provider 枚举。
+- 七个固定流程由迁移初始化且默认关闭。T08 配置接口完成不等于 T09 真实 LLM 输出质量或 T20 rerank 验收完成。DeepSeek 官方 Key/明确代理选择仍缺少，暂不调用 DeepSeek。

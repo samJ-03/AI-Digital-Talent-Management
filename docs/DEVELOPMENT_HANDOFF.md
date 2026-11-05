@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：继续开发；T07 已验证，下一任务 T08。
+更新：2026-11-05；状态：继续开发；T08 已验证；T09 的真实 LLM 仍缺凭据，可先推进已满足依赖的 HR 业务任务。
 
 ## 1. 从这里继续
 
@@ -24,9 +24,11 @@
 |T05 后台账号管理|完成|f8aee3a；当前最近完整测试74通过|
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
-|T08～T43|未完成|按详细计划和依赖推进；生产发布需单独授权|
+|T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
+|T09～T43|未完成|T09真实LLM缺凭据；可继续独立任务。生产发布需单独授权|
 
-最新完整测试：artifacts/t07-final-suite.log，107 passed。
+最新完整测试：artifacts/t08-final-suite.log，126 passed。
+真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
 不要声称招聘业务已跑通；当前完成的是基础设施、账号和任务框架。
 证据报告：artifacts/t01-*～t05-*；执行流水：.execution/progress.md；任务摘录：.execution/T04-brief.md、T05-brief.md、T06-brief.md。
@@ -34,15 +36,17 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 ## 3. 当前工作与下一步
 
-T06 已提交42794f3；T07 已完成验收，见 artifacts/t07-verification.md。先检查实际 git status/log，保护任何新出现的未提交修改。
+T06 已提交42794f3，T07 已提交fa55a2f。T08已完成验收，见artifacts/t08-verification.md；先检查git实际日志/未提交修改，不覆盖新工作。
 
-继续 T08：管理员模型配置、提示词与固定流程管理；按最新模型决策补充支持 DeepSeek/DashScope，而非默认启用 Ollama。T08 配置与验证状态可继续实现；真实 deepseek-flash 调用仍需官方 Key 或明确代理授权，不扫描其他目录，不将代理 Key 发往 DeepSeek 官方。百炼北京域名已找到，不重复询问地域。T09 实际质量/联网测试不因配置CRUD通过就勾选完成。
+下一步可先推进 T11 题库与不可变岗位试卷、T12 岗位版本（依赖 T05/T04，均已满足），补核心 HR 业务。T09 网关实现可以继续，但真正的 DeepSeek LLM 质量验收仍缺官方 Key 或明确代理渠道授权，不能标完成；T10邮件配置依赖已满足也可按计划推进。不要把模型凭据缺项当作所有开发的阻塞。
 
-后续也可推进已满足依赖的独立任务；不要因模型凭据缺项停止所有基础功能。Word 转换后的100页限制、图像完整解码与OCR兼容在 T13 验收；单批50在 T14；当前上传格式检查不能当作这些解析验收已完成。
+T08实现约定：provider_type仍是ollama/compatible_http，官方 URL+model allowlist 决定实际适配；不自动允许 api.openai-proxy.org。七个固定流程由0003_fixed_workflows迁移创建且默认关闭。提示词发布自身调用IdempotencyService，幂等键由服务构造参数从HTTP传入。模型测试只用合成输入；cloud model_digest=None，不能把model ID当作权重摘要。加密主密钥保留主项目.env，恢复加密数据库时必须一并保留。
 
-T07 使用鉴权附件流代理实现 API099。文件关联由 FileService.attach 在调用方 UoW 内锁定并置ready；领域关联记录必须在同一事务保存。关联资料的下载必须经过持久化领域关系授权；原上传者不能绕过私有部门关系。清理只处理本业务桶内过期无引用 staged 文件及无元数据的UUID前缀对象，并保留至少1小时宽限。
+凭据事实：旧DASHSCOPE_API_KEY是占位项；已根据旧TextEmbedding代码的明确引用，复用授权文件ALIYUN_API_KEY到主项目.env的TALENT_DASHSCOPE_API_KEY。真实embedding鉴权1024维成功。不要再盲选占位项或重复询问百炼地域。DeepSeek官方Key仍缺。
 
-T06 约定：worker固定 handler 注册表，当前只有技术 system.verify；业务 handler 尚未实现。外部慢 I/O 不能凭任务租约假定可任意提交结果，落库须验证租约/版本与领域幂等。API098 HR-only，管理员另用后续脱敏runtime。
+从T08起 .execution/publish.py 排除.env；不要用旧缓存覆盖主项目私有环境。临时staging已去掉用户模型Key与加密主密钥，仅主项目.env持有配置；源文件从未改动。Standalone default_session_factory初始化时加载全部40ORM表，回归测试使用新进程且显式设置backend PYTHONPATH。
+
+后续边界：Word渲染后100页/完整图像解码与OCR留T13，单批50留T14。API099为鉴权附件流，FileService.attach须在领域调用方同一UoW保存关联。任务Worker固定处理器，当前仅system.verify技术诊断；外部副作用必须有领域幂等/租约隔离，不能把技术诊断当招聘验收。
 
 ## 4. 运行环境和命令
 
@@ -63,7 +67,7 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 
 当前工具工作区可写 D:/AI数字化人才平台-相关文档；Obsidian 目录需要沙箱提权写入。已获用户明确授权的目标路径不需要再次询问。
 临时 staging：D:/AI数字化人才平台-相关文档/.implementation-stage。
-同步脚本：该 staging 下 .execution/publish.py，检查固定目标后 robocopy /E（不是 /MIR，不删除目标文件），并复制计划完成状态。
+同步脚本：该 staging 下 .execution/publish.py，检查固定目标后 robocopy /E /XF .env（不是 /MIR，不删除目标文件，不覆盖私有环境），并复制计划完成状态。
 注意：staging 包含本项目生成的 .env，必须当作秘密；不要输出、提交或分享。广泛同步前先核对目标工作区有无新增修改，避免旧 staging 覆盖新 agent 在目标目录的改动；如直接在目标目录开发，先同步到 staging 或停止使用旧同步流程。
 计划状态 staging：D:/AI数字化人才平台-相关文档/.plan-progress-stage。
 若新会话对 Obsidian 有正常写权限，可直接编辑目标仓库，不必沿用临时 staging；但必须先检查两边差异。
@@ -72,7 +76,7 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 
 本地 MySQL/Redis/MinIO/.env 凭据由本项目随机生成；没有使用用户已有数据库或企业服务密码。后台管理员与两名部门 HR 的密码也是随机生成，保存在 .execution/local-accounts.json。该文件和 .env 均在 Git 忽略范围内；不要读取后显示、写进文档或 Git；bootstrap 不重置现有账号。
 
-最新授权：用户指定 DeepSeek deepseek-flash，百炼 text-embedding-v3（原文 test-embedding-v3）与可选 qwen3-rerank，并授权从 D:/Wolin_Project/Yue-Education/.env 选择所需凭据。只读核对发现百炼 Key 存在；无独立 DeepSeek 官方 Key，旧 OPENAI_API_KEY 配套第三方 api.openai-proxy.org。已询问官方直连还是该代理，等待答复。已补查 D:/wolin_learn-master/rag_examples：发现百炼北京旧共享域名 https://dashscope.aliyuncs.com/compatible-mode/v1，地区/endpoint 不再需用户补充，但实际认证/模型调用尚未验证；该目录也无 DeepSeek 官方 Key。未复制模型 Key、未调用云模型、未发送真实招聘邮件。详见 docs/MODEL_AND_DATABASE_DECISION.md。数据库按用户“改动大则保持原栈”决定保留 MySQL+Milvus；PostgreSQL 端口与协议已确认响应，但未认证或修改。
+最新授权：用户指定 DeepSeek deepseek-flash，百炼 text-embedding-v3（原文 test-embedding-v3）与可选 qwen3-rerank，并授权从 D:/Wolin_Project/Yue-Education/.env 选择所需凭据。只读核对发现百炼 Key 存在；无独立 DeepSeek 官方 Key，旧 OPENAI_API_KEY 配套第三方 api.openai-proxy.org。已询问官方直连还是该代理，等待答复。已补查 D:/wolin_learn-master/rag_examples：发现百炼北京旧共享域名 https://dashscope.aliyuncs.com/compatible-mode/v1，地区/endpoint 不再需用户补充，但实际认证/模型调用尚未验证；该目录也无 DeepSeek 官方 Key。后续 T08 已按代码用途选择 ALIYUN_API_KEY（DASHSCOPE_API_KEY 实为占位项）复制到主项目私有环境并通过合成文本 embedding 真实检查；未调用 DeepSeek、未发送真实招聘邮件。详见 docs/MODEL_AND_DATABASE_DECISION.md。数据库按用户“改动大则保持原栈”决定保留 MySQL+Milvus；PostgreSQL 端口与协议已确认响应，但未认证或修改。
 
 到 T08/T09 接入前，先取得待答复的 DeepSeek 官方凭据或明确代理渠道选择；百炼按已查到的北京共享域名进行合成输入连通检查，不再重复询问地域。云端路线与拟用模型已经由用户指定，不要重复询问同一选择；合成数据做最小连通验证，费用/额度问题出现时如实反馈。若选 OpenAI，先使用 openai-platform-api-key 技能的凭据流程，再配置用户明确指定的本地目的地；不得扫描并复用现有 Key。其他供应商也只使用用户明确指定的项目凭据。不要让用户将密码/完整 API Key 发到普通聊天；用本地 .env/秘密文件或受支持的安全配置流程。企业 SMTP、生产数据库/对象存储、部署机器与 HTTPS 域名配置在实际接入时单独确认。
 

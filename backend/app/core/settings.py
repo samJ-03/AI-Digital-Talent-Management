@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     environment: Literal['dev','test','production'] = 'dev'
     database_url: SecretStr
     redis_url: SecretStr
+    dashscope_api_key: SecretStr | None = None
+    encryption_key: SecretStr | None = None
     minio_endpoint: str = 'minio:9000'
     minio_user: SecretStr | None = None
     minio_password: SecretStr | None = None

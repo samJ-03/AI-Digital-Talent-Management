@@ -14,6 +14,7 @@ from app.core.types import ApiEnvelope, HealthView, ReadinessView, MonitorContex
 from app.core.readiness import InfrastructureProbe
 
 from app.identity.router import IdentityRuntime, identity_router
+from app.ai_runtime.router import AiRuntime,router as ai_router
 from app.core.request_context import request_id_context
 from app.runtime.router import router as runtime_router
 from app.files.router import router as files_router
@@ -37,10 +38,12 @@ def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(title='AI数字化人才平台', version='0.1.0', lifespan=lifespan, docs_url='/docs' if settings.environment != 'production' else None)
     app.state.readiness_probe = probe.check
     app.state.identity = identity
+    app.state.ai_runtime=AiRuntime(identity.uow_factory,settings)
     app.state.file_service=FileService(file_store,identity.uow_factory,max_file_bytes=settings.max_file_bytes,max_pages=settings.max_file_pages) if file_store else None
     app.include_router(identity_router())
     app.include_router(runtime_router)
     app.include_router(files_router)
+    app.include_router(ai_router)
 
     @app.middleware('http')
     async def request_identity(request: Request, call_next):

@@ -37,3 +37,7 @@ After migrations, run `python scripts/bootstrap_local.py` once. It creates an ad
 ## Private files
 
 API099 GET `/api/v1/files/{id}/download` returns an authenticated attachment stream with private/no-store headers. MinIO stays private and separate from the Milvus internal bucket. Upload staging is an internal service used by later import/knowledge endpoints. `python scripts/verify_file_http.py` exercises a synthetic PNG through the actual local proxy and cleans only its own unreferenced probe object. PDF upload enforces the page limit; rendered Word/OCR acceptance is tracked separately in T13.
+
+## Model administration
+
+Model connections are immutable revisions; secrets are write-only and encrypted under the private TALENT_ENCRYPTION_KEY. Retain this key to restore encrypted configuration. Official URL/model allowlists are enforced before credentials or requests are used; redirects are refused. Published prompt revisions remain immutable, publish requires Idempotency-Key, workflow updates require If-Match. Seven fixed workflows are seeded disabled. Run `python scripts/verify_ai_config_http.py` for read-only local admin/HR authorization checks. Actual text-embedding-v3 synthetic connectivity has been verified; DeepSeek LLM and reranking quality remain separate gates.
