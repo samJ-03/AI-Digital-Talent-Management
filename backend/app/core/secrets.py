@@ -1,8 +1,10 @@
+import hashlib,hmac
 from cryptography.fernet import Fernet,InvalidToken
 from app.core.errors import DomainError
 
 class SecretCipher:
     def __init__(self,key: str):
+        self._fingerprint_key=hashlib.sha256(b'talent-idempotency:'+key.encode()).digest()
         try: self.fernet=Fernet(key.encode())
         except (ValueError,TypeError):
             raise DomainError('SECRET_KEY_UNAVAILABLE',503,'加密配置不可用') from None
@@ -18,3 +20,6 @@ class SecretCipher:
             return self.fernet.decrypt(ciphertext[3:].encode()).decode()
         except (InvalidToken,ValueError,UnicodeError,TypeError):
             raise DomainError('SECRET_DECRYPT_FAILED',503,'凭据无法解密，请核对加密配置') from None
+
+    def fingerprint(self,plaintext: str) -> str:
+        return hmac.new(self._fingerprint_key,plaintext.encode(),hashlib.sha256).hexdigest()

@@ -35,6 +35,15 @@ jobs:
         env:
           MINIO_ROOT_USER: ci-only-user
           MINIO_ROOT_PASSWORD: ci-only-ephemeral-minio
+      - name: Start isolated Mailpit
+        run: docker run --detach --name talent-ci-mailpit --publish 127.0.0.1:1025:1025 --publish 127.0.0.1:8025:8025 axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
+      - name: Map test-only Mailpit alias on disposable runner
+        run: |
+          sudo python - <<'PY'
+          from pathlib import Path
+          with Path('/etc/hosts').open('a') as stream:
+              stream.write('\n127.0.0.1 mailpit\n')
+          PY
       - name: Wait for MinIO readiness
         run: |
           python - <<'PY'

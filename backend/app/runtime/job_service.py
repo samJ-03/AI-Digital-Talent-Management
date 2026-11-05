@@ -18,6 +18,10 @@ REF_IDS=frozenset({'candidate_id','resume_version_id','profile_id','job_id','job
 REF_REVISIONS=frozenset({'submission_revision','parser_revision','profile_revision','embedding_revision','review_revision'})
 
 @dataclass(frozen=True,slots=True)
+class TerminalJobFailure:
+    error_code: str
+
+@dataclass(frozen=True,slots=True)
 class JobSpec:
     job_type: str
     entity_type: str
@@ -111,10 +115,14 @@ class BackgroundJobService:
         return job
 
     def _success(self,job,result):
-        if not isinstance(result,ResultRef): raise TypeError('Handler must return a result reference')
+        if not isinstance(result,(ResultRef,TerminalJobFailure)): raise TypeError('Handler must return a result reference or terminal failure')
         if job.lease_until<=utc_naive(self.clock.now()):
             raise DomainError('STALE_JOB_LEASE',409,'任务租约已失效')
-        job.state='succeeded';job.error_code=None;job.lease_owner=None;job.lease_until=None;job.next_run_at=None
+        failure=isinstance(result,TerminalJobFailure)
+        safe={'SMTP_DELIVERY_UNKNOWN','SMTP_TEST_FAILED','MAIL_CONFIG_DISABLED','MAIL_TEST_EXPIRED'}
+        job.state='failed' if failure else 'succeeded'
+        job.error_code=result.error_code if failure and result.error_code in safe else ('HANDLER_FAILED' if failure else None)
+        job.lease_owner=None;job.lease_until=None;job.next_run_at=None
 
     def complete(self,lease: JobLease,result: ResultRef) -> None:
         with self.uow_factory() as uow:
@@ -164,7 +172,8 @@ class JobRunner:
             self.service.fail(lease,'HANDLER_NOT_REGISTERED',False)
             return
         try:
-            self.service.run_atomic(lease,handler)
+            callback=handler.prepare(lease) if hasattr(handler,'prepare') else handler
+            self.service.run_atomic(lease,callback)
         except Exception:
             # Never persist exception messages, raw model output, credentials or source material.
             try: self.service.fail(lease,'HANDLER_FAILED')

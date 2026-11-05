@@ -1,7 +1,7 @@
 from datetime import datetime,timedelta
 import signal
 import threading
-from sqlalchemy import select,or_,and_,text,create_engine,exists,func
+from sqlalchemy import select,or_,and_,text,create_engine,exists,func,update
 from app.core.clock import Clock
 from app.core.settings import Settings
 from app.core.uow import make_uow
@@ -36,6 +36,7 @@ class LeaseRecovery:
                 job.state='queued';job.lease_owner=None;job.lease_until=None;job.next_run_at=now
                 add_dispatch(uow.session,job,now)
                 recovered+=1
+            uow.session.execute(update(OutboxEvent).where(OutboxEvent.expires_at<=now,OutboxEvent.private_payload_ciphertext.is_not(None)).values(private_payload_ciphertext=None,row_version=OutboxEvent.row_version+1))
             uow.commit()
         return recovered
 

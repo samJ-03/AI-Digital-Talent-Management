@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：T11已验证，下一项T10邮件配置；T09真实LLM缺凭据。
+更新：2026-11-05；状态：T10已验证；下一项T09网关实现，真实DeepSeek验收仍缺凭据。
 
 ## 1. 从这里继续
 
@@ -25,11 +25,13 @@
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
 |T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
-|T09、T10|未完成|T09真实LLM缺凭据；下一项先推进T10邮件配置|
+|T09|未完成|实现和真实LLM验收仍待推进；官方Key/明确代理授权未提供|
+|T10 邮件配置和发送适配器|完成|完整149通过；本地Celery→SMTP→Mailpit真实收件并激活配置1；企业SMTP未接入|
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
 |T12～T43|未完成|按依赖推进，生产发布需单独授权|
 
-最新完整测试：artifacts/t11-final-suite.log，137 passed。
+最新完整测试：artifacts/t10-final-suite.log，149 passed。
+真实Mailpit：artifacts/t10-live-mailpit.json，config1已验证并active，只有本地测试信。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
 不要声称招聘业务已跑通；当前完成的是基础设施、账号和任务框架。
@@ -40,7 +42,7 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 T06 已提交42794f3，T07 已提交fa55a2f。T08已完成验收，见artifacts/t08-verification.md；先检查git实际日志/未提交修改，不覆盖新工作。
 
-T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。下一步先T10邮件配置（T05/T06/T08已满足）；T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09真实DeepSeek缺官方Key或明确代理授权，不能伪造验收。
+T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。T10现已完成：完整149通过，本地Mailpit测试接入已激活；下一步T09网关实现，真实DeepSeek测试仍缺凭据。T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09真实DeepSeek缺官方Key或明确代理授权，不能伪造验收。
 
 用户要求减少token：只读当前任务摘录和相关文件，输出摘要；保留有意义RED/GREEN和任务末完整回归，避免无变化重复检查；不用未授权的子agent。原审批曾因额度失败，用户现已明确继续，正常审批已恢复；不要绕过审批。
 
@@ -87,3 +89,8 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 ## 7. 已确认且不能擅自改的核心业务
 
 单企业、外部候选人；管理员管账号/模型，HR 招聘。共享基础履历人才库；岗位、考试、面试评价按部门授权，私有评价不能进入共享画像/向量。HR 导入，邮箱必须补齐才能自动邀考。硬规则筛选 pass/fail/unknown，画像匹配加岗位卷分数辅助人工选人；有理由人工覆盖不能绕过邮箱/岗位/试卷等技术前提。岗位自动邀请默认关闭。服务端计时/保存/提交，候选人不看答案/评分/私密评价。招聘结果由 HR 决定。智能培训只做框架。
+
+
+### T10续接注意
+
+Worker现在支持受控handler.prepare(lease)→原子finalize；邮件测试在SMTP前持久化processing标记，崩溃/超时后unknown终态，不自动重发。TerminalJobFailure可与领域状态同事务提交。服务端停用/切换SMTP只处理尚未发送pending通知为failed，mail_config_id不改。SMTP延迟connect要设置经过验证的_host用于Python3.11 SNI，证书检查始终启用。0004仅放宽数据库允许none，服务策略只准本地Mailpit。API094最小脱敏任务报告已提前提供，T28再补完整读取层。

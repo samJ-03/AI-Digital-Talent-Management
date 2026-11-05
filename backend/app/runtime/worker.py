@@ -17,7 +17,11 @@ def verify_runtime(uow,job):
     uow.session.flush()
     return ResultRef('background_job',job.id,200)
 
-HANDLERS={'system.verify':verify_runtime}
+from app.notifications.test_handler import MailTestHandler
+from app.core.secrets import SecretCipher
+from app.core.uow import make_uow
+mail_cipher=SecretCipher(settings.encryption_key.get_secret_value()) if settings.encryption_key else None
+HANDLERS={'system.verify':verify_runtime,'mail.test':MailTestHandler(make_uow,mail_cipher,settings)}
 
 @celery_app.task(name='talent.execute_job')
 def execute_job(job_id: int) -> None:

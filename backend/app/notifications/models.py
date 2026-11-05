@@ -34,7 +34,7 @@ class MailConfig(Base):
     revision_no: Mapped[int] = mapped_column(mysql.INTEGER(unsigned=True), nullable=False)
     smtp_host: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     smtp_port: Mapped[int] = mapped_column(mysql.INTEGER(unsigned=True), nullable=False)
-    tls_mode: Mapped[str] = mapped_column(sa.String(24), nullable=False, info={"allowed_values":["starttls","tls"]})
+    tls_mode: Mapped[str] = mapped_column(sa.String(24), nullable=False, info={"allowed_values":["starttls","tls","none"]})
     sender_address: Mapped[str] = mapped_column(sa.String(254), nullable=False)
     username: Mapped[str | None] = mapped_column(sa.String(255), nullable=True)
     secret_ciphertext: Mapped[str | None] = mapped_column(sa.Text(), nullable=True)
@@ -42,7 +42,7 @@ class MailConfig(Base):
     state: Mapped[str] = mapped_column(sa.String(24), nullable=False, default="draft", server_default="draft", info={"allowed_values":["draft","verified","active","disabled"]})
     __table_args__ = (
         sa.UniqueConstraint("revision_no", name="uq_mail_configs_revision_no"),
-        sa.CheckConstraint("tls_mode IN ('starttls','tls')", name="ck_mail_configs_tls_mode"),
+        sa.CheckConstraint("tls_mode IN ('starttls','tls','none')", name="ck_mail_configs_tls_mode"),
         sa.CheckConstraint("state IN ('draft','verified','active','disabled')", name="ck_mail_configs_state"),
         {"mysql_charset":"utf8mb4","mysql_collate":"utf8mb4_0900_ai_ci","comment":"邮件连接修订"},
     )

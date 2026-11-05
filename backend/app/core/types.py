@@ -35,3 +35,8 @@ class SchemaManifest(TypedDict):
     tables: list[str]
     indexes: dict[str, list[dict[str, Any]]]
     foreign_keys: dict[str, list[dict[str, Any]]]
+
+class TaskAccepted(BaseModel):
+    task_id: str
+    state: str
+    poll_url: str

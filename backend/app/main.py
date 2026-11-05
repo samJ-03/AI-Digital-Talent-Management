@@ -16,6 +16,7 @@ from app.core.readiness import InfrastructureProbe
 from app.identity.router import IdentityRuntime, identity_router
 from app.ai_runtime.router import AiRuntime,router as ai_router
 from app.assessment.paper_router import router as paper_router
+from app.notifications.router import MailRuntime,router as mail_router
 from app.core.request_context import request_id_context
 from app.runtime.router import router as runtime_router
 from app.files.router import router as files_router
@@ -40,12 +41,14 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.readiness_probe = probe.check
     app.state.identity = identity
     app.state.ai_runtime=AiRuntime(identity.uow_factory,settings)
+    app.state.mail_runtime=MailRuntime(identity.uow_factory,settings)
     app.state.file_service=FileService(file_store,identity.uow_factory,max_file_bytes=settings.max_file_bytes,max_pages=settings.max_file_pages) if file_store else None
     app.include_router(identity_router())
     app.include_router(runtime_router)
     app.include_router(files_router)
     app.include_router(ai_router)
     app.include_router(paper_router)
+    app.include_router(mail_router)
 
     @app.middleware('http')
     async def request_identity(request: Request, call_next):
