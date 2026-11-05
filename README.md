@@ -33,3 +33,7 @@ Compose入口显式加载本项目.env。仅操作ai-talent-dev命名空间，�
 ## Local accounts
 
 After migrations, run `python scripts/bootstrap_local.py` once. It creates an administrator and two department HR accounts with random passwords; no fixed default passwords. The generated credentials stay in ignored `.execution/local-accounts.json`; never commit or share this file. Bootstrap refuses existing accounts and never resets them. `python scripts/verify_identity_http.py` verifies login/logout and role separation through the local proxy without printing credentials. Production requires HTTPS trusted origins and secure cookies.
+
+## Private files
+
+API099 GET `/api/v1/files/{id}/download` returns an authenticated attachment stream with private/no-store headers. MinIO stays private and separate from the Milvus internal bucket. Upload staging is an internal service used by later import/knowledge endpoints. `python scripts/verify_file_http.py` exercises a synthetic PNG through the actual local proxy and cleans only its own unreferenced probe object. PDF upload enforces the page limit; rendered Word/OCR acceptance is tracked separately in T13.

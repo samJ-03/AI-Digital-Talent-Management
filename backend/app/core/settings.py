@@ -7,6 +7,13 @@ class Settings(BaseSettings):
     environment: Literal['dev','test','production'] = 'dev'
     database_url: SecretStr
     redis_url: SecretStr
+    minio_endpoint: str = 'minio:9000'
+    minio_user: SecretStr | None = None
+    minio_password: SecretStr | None = None
+    minio_bucket: str = 'talent-business'
+    minio_secure: bool = False
+    max_file_bytes: int = 20*1024*1024
+    max_file_pages: int = 100
     session_namespace: str = 'talent:staff'
     trusted_origins: list[str] = ['http://localhost:13000','http://127.0.0.1:13000']
     monitor_token: SecretStr

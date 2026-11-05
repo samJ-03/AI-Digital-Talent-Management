@@ -16,22 +16,31 @@ from app.core.readiness import InfrastructureProbe
 from app.identity.router import IdentityRuntime, identity_router
 from app.core.request_context import request_id_context
 from app.runtime.router import router as runtime_router
+from app.files.router import router as files_router
+from app.files.storage import S3FileStore
+from app.files.service import FileService
 
 logger = logging.getLogger('talent.api')
 
 def create_app(settings: Settings) -> FastAPI:
     probe = InfrastructureProbe(settings)
     identity = IdentityRuntime(settings)
+    file_store=S3FileStore.from_settings(settings) if settings.minio_user and settings.minio_password else None
     @asynccontextmanager
     async def lifespan(app):
-        yield
-        probe.close()
-        identity.close()
+        try:
+            yield
+        finally:
+            probe.close()
+            identity.close()
+            if file_store: file_store.close()
     app = FastAPI(title='AI数字化人才平台', version='0.1.0', lifespan=lifespan, docs_url='/docs' if settings.environment != 'production' else None)
     app.state.readiness_probe = probe.check
     app.state.identity = identity
+    app.state.file_service=FileService(file_store,identity.uow_factory,max_file_bytes=settings.max_file_bytes,max_pages=settings.max_file_pages) if file_store else None
     app.include_router(identity_router())
     app.include_router(runtime_router)
+    app.include_router(files_router)
 
     @app.middleware('http')
     async def request_identity(request: Request, call_next):

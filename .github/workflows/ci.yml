@@ -6,6 +6,9 @@ jobs:
     env:
       TALENT_TEST_DATABASE_URL: mysql+pymysql://talent:ci-only-ephemeral@127.0.0.1:3306/talent_test?charset=utf8mb4
       TALENT_REDIS_URL: redis://127.0.0.1:6379/0
+      TALENT_MINIO_ENDPOINT: 127.0.0.1:9000
+      TALENT_MINIO_USER: ci-only-user
+      TALENT_MINIO_PASSWORD: ci-only-ephemeral-minio
     services:
       redis:
         image: redis@sha256:8da19c7399dca900c6822a1cf30f9d2285585e2c4b457ff4095b0f4500054d3f
@@ -27,6 +30,24 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '24', cache: npm, cache-dependency-path: frontend/package-lock.json}
       - run: python -m pip install -r backend/requirements.lock
+      - name: Start isolated MinIO
+        run: docker run --detach --name talent-ci-minio --publish 9000:9000 --env MINIO_ROOT_USER --env MINIO_ROOT_PASSWORD minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e server /data
+        env:
+          MINIO_ROOT_USER: ci-only-user
+          MINIO_ROOT_PASSWORD: ci-only-ephemeral-minio
+      - name: Wait for MinIO readiness
+        run: |
+          python - <<'PY'
+          import time, urllib.request
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:9000/minio/health/ready',timeout=2) as response:
+                      if response.status==200: break
+              except Exception:
+                  time.sleep(1)
+          else:
+              raise SystemExit('CI MinIO did not become ready')
+          PY
       - run: python -m pytest -q
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: frontend
