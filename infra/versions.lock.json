@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-11-05T03:29:52.304669+00:00",
+  "platform": "linux/amd64",
+  "bootstrap": [
+    {
+      "name": "python",
+      "ok": true,
+      "version": "3.11.17",
+      "reason": null,
+      "evidence_path": null
+    },
+    {
+      "name": "node",
+      "ok": true,
+      "version": "24.21.0",
+      "reason": null,
+      "evidence_path": null
+    },
+    {
+      "name": "git",
+      "ok": true,
+      "version": "2.56.0",
+      "reason": null,
+      "evidence_path": null
+    },
+    {
+      "name": "docker",
+      "ok": true,
+      "version": "29.6.1",
+      "reason": null,
+      "evidence_path": null
+    },
+    {
+      "name": "compose",
+      "ok": true,
+      "version": "5.3.0",
+      "reason": null,
+      "evidence_path": null
+    },
+    {
+      "name": "docker_linux",
+      "ok": true,
+      "version": null,
+      "reason": null,
+      "evidence_path": null
+    }
+  ],
+  "images": {
+    "python": "python@sha256:94a8fee35252d06ab75856f15f12c7bae67b10e8a6da93c7fded82b2610926cd",
+    "mysql": "mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902",
+    "redis": "redis@sha256:8da19c7399dca900c6822a1cf30f9d2285585e2c4b457ff4095b0f4500054d3f",
+    "mailpit": "axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231",
+    "minio": "minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e",
+    "milvus": "milvusdb/milvus@sha256:fb57464669737ee9a9c43c6faa891527adab601241b0b488091c5f4eb4a13178",
+    "etcd": "quay.io/coreos/etcd@sha256:89b6debd43502d1088f3e02f39442fd3e951aa52bee846ed601cf4477114b89e",
+    "nginx": "nginx@sha256:abe47724e466aeab9a345d8e46a221c2fa8953c7848bb4a3bd9976a7199f8cf2",
+    "node": "node@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c"
+  },
+  "frontend": {
+    "name": "ai-talent-frontend",
+    "version": "0.1.0",
+    "private": true,
+    "engines": {
+      "node": ">=24 <25"
+    },
+    "scripts": {
+      "dev": "next dev -p 13000",
+      "build": "next build",
+      "start": "next start -p 13000",
+      "typecheck": "tsc --noEmit",
+      "test:e2e": "playwright test",
+      "generate:api": "openapi-typescript ../artifacts/openapi.json -o src/generated/api-types.ts"
+    },
+    "dependencies": {
+      "next": "16.4.5",
+      "react": "19.3.1",
+      "react-dom": "19.3.1",
+      "antd": "6.7.0",
+      "@tanstack/react-query": "5.106.0",
+      "echarts": "6.1.0"
+    },
+    "devDependencies": {
+      "typescript": "5.9.3",
+      "@types/node": "24.19.2",
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      "@playwright/test": "1.64.1",
+      "openapi-typescript": "7.13.0"
+    }
+  },
+  "backend": {
+    "requirements": "backend/requirements.lock",
+    "resolved_on": "Python3.11 Linux",
+    "installation_verified": true,
+    "imports": {
+      "python": "3.11.18",
+      "platform": "linux",
+      "imports": [
+        {
+          "package": "fastapi",
+          "version": "0.162.0",
+          "ok": true
+        },
+        {
+          "package": "pydantic",
+          "version": "2.14.2",
+          "ok": true
+        },
+        {
+          "package": "pydantic-settings",
+          "version": "2.16.2",
+          "ok": true
+        },
+        {
+          "package": "SQLAlchemy",
+          "version": "2.0.57",
+          "ok": true
+        },
+        {
+          "package": "alembic",
+          "version": "1.20.1",
+          "ok": true
+        },
+        {
+          "package": "PyMySQL",
+          "version": "1.2.3",
+          "ok": true
+        },
+        {
+          "package": "redis",
+          "version": "7.4.1",
+          "ok": true
+        },
+        {
+          "package": "celery",
+          "version": "5.6.3",
+          "ok": true
+        },
+        {
+          "package": "httpx",
+          "version": "0.28.1",
+          "ok": true
+        },
+        {
+          "package": "minio",
+          "version": "7.2.20",
+          "ok": true
+        },
+        {
+          "package": "pymilvus",
+          "version": "2.6.17",
+          "ok": true
+        },
+        {
+          "package": "langgraph",
+          "version": "1.2.20",
+          "ok": true
+        },
+        {
+          "package": "pypdf",
+          "version": "6.21.4",
+          "ok": true
+        },
+        {
+          "package": "python-docx",
+          "version": "1.2.0",
+          "ok": true
+        },
+        {
+          "package": "cryptography",
+          "version": "47.0.0",
+          "ok": true
+        },
+        {
+          "package": "argon2-cffi",
+          "version": "25.1.0",
+          "ok": true
+        },
+        {
+          "package": "pytest",
+          "version": "8.4.2",
+          "ok": true
+        }
+      ]
+    }
+  },
+  "not_yet_verified": [
+    "service_protocol_readiness",
+    "model_digest_and_quality",
+    "OCR_compatibility",
+    "frontend_build"
+  ]
+}
