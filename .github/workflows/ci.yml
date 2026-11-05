@@ -3,6 +3,18 @@ on: [push, pull_request]
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      TALENT_TEST_DATABASE_URL: mysql+pymysql://talent:ci-only-ephemeral@127.0.0.1:3306/talent_test?charset=utf8mb4
+    services:
+      mysql:
+        image: mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-ephemeral-root
+          MYSQL_DATABASE: talent_test
+          MYSQL_USER: talent
+          MYSQL_PASSWORD: ci-only-ephemeral
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=5s --health-retries=30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -28,3 +28,10 @@ class Page(BaseModel, Generic[T]):
     total: int
     page: int
     page_size: int
+
+from typing import TypedDict
+
+class SchemaManifest(TypedDict):
+    tables: list[str]
+    indexes: dict[str, list[dict[str, Any]]]
+    foreign_keys: dict[str, list[dict[str, Any]]]
