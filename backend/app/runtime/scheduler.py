@@ -1,3 +1,4 @@
+"""持久后台任务与Outbox：执行单实例调度、租约恢复和到期载荷清理。"""
 from datetime import datetime,timedelta
 import signal
 import threading
@@ -9,10 +10,12 @@ from app.runtime.job_service import BackgroundJobService,utc_naive,add_dispatch
 from app.runtime.models import BackgroundJob,OutboxEvent
 
 class LeaseRecovery:
+    """LeaseRecovery：持久后台任务与Outbox中的协作类型。"""
     def __init__(self,uow_factory=make_uow,clock: Clock|None=None):
         self.uow_factory=uow_factory;self.clock=clock or Clock()
 
     def requeue_expired(self,now: datetime,limit: int) -> int:
+        """恢复过期租约和丢失的交付，不重复提交业务结果。"""
         if not 1<=limit<=1000: raise ValueError('Recovery limit must be 1..1000')
         now=utc_naive(now)
         recovered=0
@@ -52,6 +55,7 @@ class SchedulerLease:
         self.connection.commit()
         return self
     def check(self):
+        """检查实际依赖或配置状态，并返回明确结果。"""
         if self.connection.scalar(text('SELECT IS_USED_LOCK(:name)=CONNECTION_ID()'),{'name':self.name})!=1:
             raise RuntimeError('Scheduler lease was lost')
         self.connection.commit()
@@ -63,6 +67,7 @@ class SchedulerLease:
 
 
 def main():
+    """执行本模块声明的命令行入口。"""
     from app.runtime.outbox import OutboxDispatcher
     from app.runtime.worker import publish_job
     engine=create_engine(Settings.load().database_url.get_secret_value(),pool_pre_ping=True)

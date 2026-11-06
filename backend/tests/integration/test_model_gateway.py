@@ -1,3 +1,4 @@
+"""平台开发工具：验证model gateway的正常与失败场景；测试数据仅用于隔离环境。"""
 import json
 from uuid import uuid4
 import httpx
@@ -13,6 +14,7 @@ from app.ai_runtime.graphs import FixedGraphRunner
 from app.core.errors import DomainError
 
 class Answer(BaseModel):
+    """Answer：平台开发工具中的输入输出数据契约。"""
     model_config=ConfigDict(extra='forbid',strict=True)
     answer: str
     citations: list[dict[str,str]]

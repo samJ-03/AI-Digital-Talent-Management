@@ -1,3 +1,4 @@
+"""后台身份认证与权限：校验后台登录、注销和会话失效。"""
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHashError
 from sqlalchemy import select
@@ -13,6 +14,7 @@ from app.identity.session_store import StaffSessionStore
 from app.identity.views import resolve_user, user_view
 
 class AuthService:
+    """AuthService：后台身份认证与权限中的协作类型。"""
     def __init__(self,store: StaffSessionStore,uow_factory=make_uow):
         self.store=store
         self.uow_factory=uow_factory
@@ -21,6 +23,7 @@ class AuthService:
         self.dummy_hash=self.hasher.hash('unused-'+__import__('secrets').token_urlsafe(32))
 
     def login(self,cmd: LoginCommand) -> StaffSessionView:
+        """校验凭据并建立受保护的后台会话。"""
         self.store.limit('account',cmd.login_name.casefold(),10)
         with self.uow_factory() as uow:
             user=uow.session.scalar(select(User).where(User.login_name==cmd.login_name))
@@ -42,6 +45,7 @@ class AuthService:
             return StaffSessionView(session_id=sid,csrf_token=data.csrf_token,expires_at=data.expires_at,user=view)
 
     def require(self,session_id: str):
+        """验证权限或地址策略，不满足时失败关闭。"""
         data=self.store.get(session_id)
         with self.uow_factory() as uow:
             user=uow.session.get(User,data.user_id)
@@ -50,6 +54,7 @@ class AuthService:
             return resolve_user(uow.session,user),data
 
     def me(self,actor) -> UserView:
+        """返回当前已认证后台账号的允许字段。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.uow_factory() as uow:
             user=uow.session.get(User,actor.user_id)
             if user is None:
@@ -58,6 +63,7 @@ class AuthService:
             return user_view(uow.session,user)
 
     def logout(self,session_id: str) -> None:
+        """撤销当前后台会话并清理认证Cookie。"""
         actor,data=self.require(session_id)
         self.store.delete(session_id)
         with self.uow_factory() as uow:

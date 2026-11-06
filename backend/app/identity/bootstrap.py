@@ -9,6 +9,7 @@ from app.identity.models import User,Role,UserRole,Department
 from app.identity.permissions import ADMIN_PERMISSIONS,HR_PERMISSIONS
 
 def main():
+    """执行本模块声明的命令行入口。"""
     settings=Settings.load()
     if settings.environment!='dev':
         raise RuntimeError('Bootstrap is restricted to local development')

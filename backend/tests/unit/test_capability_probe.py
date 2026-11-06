@@ -1,3 +1,4 @@
+"""平台开发工具：验证capability probe的正常与失败场景；测试数据仅用于隔离环境。"""
 from types import SimpleNamespace
 import httpx
 import pytest

@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：管理提示词草稿、不可变发布与发布幂等。"""
 import hashlib
 import json
 from sqlalchemy import select,func
@@ -9,10 +10,12 @@ from app.core.errors import DomainError
 from app.core.idempotency import IdempotencyService,ResultRef
 
 class PromptService(AiAdminBase):
+    """PromptService：模型配置与受控AI执行中的协作类型。"""
     def __init__(self,uow_factory,idempotency_key=None):
         super().__init__(uow_factory);self.idempotency_key=idempotency_key
 
     def create(self,actor,cmd: PromptCreate):
+        """创建经过校验的领域对象，并返回其视图。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.transaction(actor,'prompt.manage') as (uow,fresh):
             lock=uow.session.scalar(select(WorkflowConfig).where(WorkflowConfig.task_type==cmd.task_type).with_for_update())
             if lock is None: raise DomainError('WORKFLOW_NOT_INITIALIZED',503,'固定流程尚未初始化')
@@ -23,6 +26,7 @@ class PromptService(AiAdminBase):
             return prompt_view(row)
 
     def publish(self,actor,prompt_id: int,reason: str):
+        """校验并发布不可变版本。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if not reason.strip(): raise DomainError('REASON_REQUIRED',422,'发布原因不可为空')
         if not self.idempotency_key: raise DomainError('IDEMPOTENCY_KEY_REQUIRED',422,'发布需要幂等键')
         with self.uow_factory() as uow: self.authorize(uow,actor,'prompt.manage')

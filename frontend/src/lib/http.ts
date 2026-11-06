@@ -1,6 +1,7 @@
 import { ApiError } from './api-error';
 export type ApiEnvelope<T> = { code: string; message: string; data: T; request_id: string };
 export type RequestOptions = { method?: string; body?: unknown; headers?: HeadersInit; signal?: AbortSignal };
+/** 同域API客户端；自动携带会话与CSRF，统一封装错误和请求标识。 */
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<ApiEnvelope<T>> {
   if (!path.startsWith('/api/v1/')) throw new ApiError('INVALID_API_PATH', 0, '只允许同域接口');
   const headers = new Headers(options.headers);

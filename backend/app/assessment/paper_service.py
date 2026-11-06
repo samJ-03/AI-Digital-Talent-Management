@@ -1,3 +1,4 @@
+"""题库、试卷与考试：管理试卷草稿与不可变发布快照。"""
 from copy import deepcopy
 from datetime import datetime,timezone
 from decimal import Decimal,ROUND_FLOOR
@@ -14,6 +15,7 @@ from app.assessment.question_service import QuestionService
 from app.assessment.views import paper_view,version_view
 
 class PaperService(HrServiceBase):
+    """PaperService：题库、试卷与考试中的协作类型。"""
     def _scope(self,paper_id):
         with self.uow_factory() as uow:
             row=uow.session.get(Paper,paper_id)
@@ -27,12 +29,14 @@ class PaperService(HrServiceBase):
         return self._scope(paper_id)
 
     def get_version(self,actor,version_id):
+        """读取有权访问的指定版本视图。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=self._version_scope(version_id)
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'paper.read',scope)
             return version_view(uow.session,uow.session.get(PaperVersion,version_id))
 
     def create(self,actor,cmd: PaperCreate):
+        """创建经过校验的领域对象，并返回其视图。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=ResourceScope('paper',department_id=cmd.department_id)
         def command(uow,fresh):
             department=uow.session.get(Department,cmd.department_id)
@@ -82,6 +86,7 @@ class PaperService(HrServiceBase):
                 answer_key=deepcopy(source.answer_key),rubric=self._frozen_rubric(source,spec.max_score),reference_sources=deepcopy(source.reference_sources)))
 
     def draft_version(self,actor,paper_id: int,cmd: PaperVersionDraft):
+        """创建新的试卷草稿版本。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=self._scope(paper_id)
         def command(uow,fresh):
             paper=uow.session.scalar(select(Paper).where(Paper.id==paper_id).with_for_update())
@@ -97,6 +102,7 @@ class PaperService(HrServiceBase):
         return self.get_version(actor,result.entity_id)
 
     def edit_draft(self,actor,version_id: int,cmd: PaperVersionDraft,expected_version: int):
+        """以乐观锁编辑草稿；已发布版本禁止原位修改。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
         scope=self._version_scope(version_id)
         with self.transaction(actor,'paper.write',scope,response_permission='paper.read') as (uow,fresh):
             row=uow.session.scalar(select(PaperVersion).where(PaperVersion.id==version_id).with_for_update())
@@ -117,6 +123,7 @@ class PaperService(HrServiceBase):
         return view
 
     def publish(self,actor,version_id: int,reason: str):
+        """校验并发布不可变版本。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if not reason.strip(): raise DomainError('REASON_REQUIRED',422,'发布原因不可为空')
         scope=self._version_scope(version_id)
         def command(uow,fresh):

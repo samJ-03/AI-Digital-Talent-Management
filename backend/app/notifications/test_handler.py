@@ -1,3 +1,4 @@
+"""邮件配置与交付：处理本地邮件配置测试的准备与原子收尾。"""
 import hashlib,json
 from datetime import datetime,timezone
 from sqlalchemy import select
@@ -16,6 +17,7 @@ class MailTestHandler:
         self.adapter=adapter or SmtpAdapter(cipher)
 
     def prepare(self,lease):
+        """在原子收尾前准备外部I/O；不在长事务内等待供应商。"""
         connection=None;recipient=None;result=None;message_id=None
         with self.uow_factory() as uow:
             job=BackgroundJobService(self.uow_factory)._owned(uow,lease)

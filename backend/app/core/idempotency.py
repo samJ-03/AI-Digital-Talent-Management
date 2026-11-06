@@ -1,3 +1,4 @@
+"""公共基础设施：在业务同一事务中保存请求指纹与结果引用，防止重复执行。"""
 from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import timedelta, timezone
@@ -13,6 +14,7 @@ from app.core.uow import SqlAlchemyUow, make_uow
 
 @dataclass(frozen=True, slots=True)
 class ResultRef:
+    """ResultRef：公共基础设施中的协作类型。"""
     entity_type: str
     entity_id: int
     response_code: int
@@ -24,12 +26,14 @@ class ResultRef:
             raise ValueError('Invalid result reference')
 
 class IdempotencyService:
+    """IdempotencyService：公共基础设施中的协作类型。"""
     def __init__(self, uow_factory: Callable[[], SqlAlchemyUow] = make_uow, clock: Clock | None = None):
         self.uow_factory = uow_factory
         self.clock = clock or Clock()
 
     def execute(self, actor: ActorContext, operation: str, key: str, payload_hash: str,
                 command: Callable[[SqlAlchemyUow], ResultRef]) -> ResultRef:
+        """执行受控操作；具体事务与幂等边界由当前服务定义。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if (not re.fullmatch(r'[a-zA-Z0-9_.:-]{1,100}',operation)
             or not re.fullmatch(r'[a-zA-Z0-9_.:-]{1,100}',key)
             or not re.fullmatch(r'[a-f0-9]{64}',payload_hash)):

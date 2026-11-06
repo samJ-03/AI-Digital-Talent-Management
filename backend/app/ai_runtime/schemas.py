@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：定义输入输出类型、字段约束及序列化边界。"""
 import json
 from typing import Literal,Any
 from pydantic import BaseModel,ConfigDict,Field,SecretStr,field_validator
@@ -7,9 +8,11 @@ TASK_TYPES=('extract','profile','match','question_generation','grade','knowledge
 TaskType=Literal['extract','profile','match','question_generation','grade','knowledge_ask','embedding']
 
 class InputModel(BaseModel):
+    """InputModel：模型配置与受控AI执行中的输入输出数据契约。"""
     model_config=ConfigDict(extra='forbid')
 
 class ModelConfigCreate(InputModel):
+    """ModelConfigCreate：模型配置与受控AI执行中的输入输出数据契约。"""
     logical_key: str=Field(min_length=1,max_length=100,pattern=r'^[a-zA-Z0-9_.-]+$')
     provider_type: Literal['ollama','compatible_http']
     base_url: str=Field(min_length=1,max_length=500)
@@ -18,6 +21,7 @@ class ModelConfigCreate(InputModel):
     embedding_dimension: Literal[64,128,256,512,768,1024]|None=None
 
 class MaskedModelConfig(BaseModel):
+    """MaskedModelConfig：模型配置与受控AI执行中的输入输出数据契约。"""
     id: str
     logical_key: str
     revision_no: int
@@ -32,6 +36,7 @@ class MaskedModelConfig(BaseModel):
     version: int
 
 class CapabilityTest(BaseModel):
+    """CapabilityTest：模型配置与受控AI执行中的输入输出数据契约。"""
     verified: bool
     capabilities: dict[str,Any]
     model_digest: str|None=None
@@ -39,12 +44,14 @@ class CapabilityTest(BaseModel):
     error_code: str|None=None
 
 class PromptCreate(InputModel):
+    """PromptCreate：模型配置与受控AI执行中的输入输出数据契约。"""
     task_type: TaskType
     content: str=Field(min_length=1,max_length=32000)
     output_schema: dict[str,Any]
     @field_validator('output_schema')
     @classmethod
     def offline_schema(cls,value):
+        """校验输出schema，并禁止远程引用及自定义资源地址。"""
         if len(json.dumps(value))>65536: raise ValueError('Schema is too large')
         def walk(node,depth=0):
             if depth>16: raise ValueError('Schema is too deep')
@@ -63,9 +70,11 @@ class PromptCreate(InputModel):
         return value
 
 class PublishCommand(InputModel):
+    """PublishCommand：模型配置与受控AI执行中的输入输出数据契约。"""
     reason: str=Field(min_length=1,max_length=500)
 
 class PromptView(BaseModel):
+    """PromptView：模型配置与受控AI执行中的输入输出数据契约。"""
     id: str
     task_type: str
     revision_no: int
@@ -76,6 +85,7 @@ class PromptView(BaseModel):
     version: int
 
 class WorkflowWrite(InputModel):
+    """WorkflowWrite：模型配置与受控AI执行中的输入输出数据契约。"""
     model_config_id: int|None=Field(default=None,gt=0)
     prompt_version_id: int|None=Field(default=None,gt=0)
     enabled: bool
@@ -83,6 +93,7 @@ class WorkflowWrite(InputModel):
     max_retries: int=Field(default=1,ge=0,le=2)
 
 class WorkflowView(BaseModel):
+    """WorkflowView：模型配置与受控AI执行中的输入输出数据契约。"""
     id: str
     task_type: str
     model_config_id: str|None

@@ -9,6 +9,7 @@ import urllib.request
 from urllib.error import HTTPError
 
 def main():
+    """执行本模块声明的命令行入口。"""
     root=Path(__file__).resolve().parents[1]
     command=[sys.executable,str(root/'scripts/compose.py'),'exec','-T','api','python','-m','app.files.verify_storage']
     created=subprocess.run(command,capture_output=True,text=True,check=True)

@@ -1,3 +1,4 @@
+"""公共基础设施：从持久化业务归属推导资源权限范围。"""
 from dataclasses import dataclass
 from app.core.access import ResourceScope,AccessPolicy,PermissionDenied
 from app.core.errors import DomainError
@@ -13,6 +14,7 @@ from app.notifications.models import Notification,MailConfig
 
 @dataclass(frozen=True,slots=True)
 class ResourceGrant:
+    """ResourceGrant：公共基础设施中的协作类型。"""
     permission: str
     scope: ResourceScope
 
@@ -24,6 +26,7 @@ class ResourceResolver:
         return row
 
     def resolve(self,session,kind: str,entity_id: int) -> ResourceGrant:
+        """把有效会话映射为当前操作者身份。"""
         if kind=='candidate':
             self._get(session,Candidate,entity_id)
             return ResourceGrant('talent.read',ResourceScope('talent',id=entity_id,shared=True))
@@ -67,6 +70,7 @@ class ResourceResolver:
         raise DomainError('RESOURCE_NOT_FOUND',404,'资源不存在')
 
     def require(self,session,actor,kind: str,entity_id: int) -> ResourceGrant:
+        """验证权限或地址策略，不满足时失败关闭。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         grant=self.resolve(session,kind,entity_id)
         try: AccessPolicy().require(actor,grant.permission,grant.scope)
         except PermissionDenied:

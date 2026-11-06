@@ -6,6 +6,7 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 from pydantic import BaseModel, ValidationError
 
 class OutputInvalid(Exception):
+    """OutputInvalid：模型配置与受控AI执行中的协作类型。"""
     pass
 
 def _pairs(pairs):
@@ -19,6 +20,7 @@ def _constant(_):
     raise OutputInvalid()
 
 def validate_output(content: str, output_type: type[BaseModel], schema: dict, evidence: list[dict]):
+    """联合校验严格JSON、发布schema、业务类型和真实来源引文。"""
     try:
         if not isinstance(content,str) or len(content.encode('utf8'))>256*1024: raise OutputInvalid()
         value=json.loads(content,object_pairs_hook=_pairs,parse_constant=_constant)
@@ -37,6 +39,7 @@ def validate_output(content: str, output_type: type[BaseModel], schema: dict, ev
         raise OutputInvalid() from None
 
 def validate_vectors(vectors, count: int, dimension: int|None) -> int:
+    """验证整个向量批次的数量、维度、有限数值及非零约束。"""
     if not isinstance(vectors,list) or len(vectors)!=count or not vectors: raise OutputInvalid()
     actual=len(vectors[0]) if isinstance(vectors[0],list) else 0
     if not 1<=actual<=8192 or dimension is not None and actual!=dimension: raise OutputInvalid()

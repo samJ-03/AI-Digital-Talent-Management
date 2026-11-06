@@ -19,6 +19,7 @@ VERSION = re.compile(r"(?<![0-9])([0-9]+\.[0-9]+(?:\.[0-9]+)?)(?![0-9])")
 
 @dataclass(frozen=True)
 class CheckResult:
+    """CheckResult：平台开发工具中的协作类型。"""
     name: str
     ok: bool
     version: str | None = None
@@ -28,6 +29,7 @@ class CheckResult:
 
 @dataclass
 class PreflightConfig:
+    """PreflightConfig：平台开发工具中的协作类型。"""
     profile: str = "bootstrap"
     required_services: tuple[str, ...] = ()
     services: dict[str, str] = field(default_factory=dict)
@@ -40,6 +42,7 @@ class PreflightConfig:
 
 @dataclass(frozen=True)
 class PreflightReport:
+    """PreflightReport：平台开发工具中的协作类型。"""
     profile: str
     checks: list[CheckResult]
     ready: bool
@@ -47,6 +50,7 @@ class PreflightReport:
 
 
 class PreflightChecker:
+    """PreflightChecker：平台开发工具中的协作类型。"""
     def __init__(self, runner: Callable = subprocess.run, service_probe: Callable | None = None):
         self.runner = runner
         self.service_probe = service_probe or self._http_protocol_probe
@@ -56,6 +60,7 @@ class PreflightChecker:
                            encoding="utf-8", errors="replace", timeout=15, shell=False)
 
     def check_runtime(self, executable: str, args: list[str]) -> CheckResult:
+        """按锁定规格检查实际运行时版本并返回脱敏检查结果。"""
         name = Path(executable).stem.lower()
         try:
             result = self._execute(executable, args)
@@ -73,6 +78,7 @@ class PreflightChecker:
         return CheckResult(name, True, version=match.group(1))
 
     def check_service(self, name: str, endpoint: str) -> CheckResult:
+        """按预检规格确认服务条件，不用端口开放冒充业务就绪。"""
         try:
             result = self.service_probe(name, endpoint)
             if not isinstance(result, CheckResult) or result.name != name:
@@ -99,6 +105,7 @@ class PreflightChecker:
         return CheckResult(name, True, version=safe_version.group(1) if safe_version else None)
 
     def run(self, config: PreflightConfig) -> PreflightReport:
+        """运行本模块定义的受控探测或固定流程。"""
         checks, blocked = [], []
         runtime_specs = [
             ("python", ["--version"], (3, 11), "PYTHON_311_REQUIRED"),
@@ -145,6 +152,7 @@ class PreflightChecker:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """执行本模块声明的命令行入口。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", choices=("bootstrap", "dev", "test", "production"), default="bootstrap")
     parser.add_argument("--report", type=Path, default=Path("artifacts/preflight.json"))

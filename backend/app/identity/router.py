@@ -1,3 +1,4 @@
+"""后台身份认证与权限：声明HTTP入口、身份依赖和响应封装。"""
 import secrets
 from fastapi import APIRouter, Depends, Header, Request, Response
 from pydantic import ValidationError
@@ -17,6 +18,7 @@ from app.identity.models import Department, Role
 COOKIE='talent_staff'
 
 class IdentityRuntime:
+    """IdentityRuntime：后台身份认证与权限中的协作类型。"""
     def __init__(self,settings):
         self.settings=settings
         self.engine=create_engine(settings.database_url.get_secret_value(),pool_pre_ping=True,pool_recycle=1800)
@@ -29,10 +31,12 @@ class IdentityRuntime:
         self.queries=IdentityQueries(self.uow_factory)
 
     def close(self):
+        """释放本对象持有的外部连接。"""
         self.redis.close()
         self.engine.dispose()
 
 def require_staff(request: Request):
+    """解析有效后台会话，拒绝候选人身份混用。"""
     runtime=request.app.state.identity
     sid=request.cookies.get(COOKIE,'')
     actor,session=runtime.auth.require(sid)
@@ -41,6 +45,7 @@ def require_staff(request: Request):
     return actor
 
 def check_origin(request: Request):
+    """验证写请求来源，防止跨站伪造。"""
     origin=request.headers.get('origin')
     if origin and origin not in request.app.state.identity.settings.trusted_origins:
         raise DomainError('ORIGIN_DENIED',403,'请求来源未获允许')
@@ -48,6 +53,7 @@ def check_origin(request: Request):
         raise DomainError('ORIGIN_DENIED',403,'请求来源未获允许')
 
 def require_staff_write(request: Request,actor=Depends(require_staff)):
+    """在后台会话基础上额外校验写请求来源和CSRF。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
     check_origin(request)
     supplied=request.headers.get('x-csrf-token','')
     if not secrets.compare_digest(supplied,request.state.staff_session.csrf_token):
@@ -55,6 +61,7 @@ def require_staff_write(request: Request,actor=Depends(require_staff)):
     return actor
 
 def expected_version(value: str|None) -> int:
+    """从If-Match解析乐观锁版本，拒绝缺失或非法值。"""
     if value is None:
         raise DomainError('VERSION_REQUIRED',428,'修改前需要提供资源版本')
     text=value.strip('"')
@@ -63,13 +70,16 @@ def expected_version(value: str|None) -> int:
     return int(text)
 
 def envelope(request,value):
+    """封装标准响应和请求链路标识。"""
     return ApiEnvelope(data=value,request_id=request.state.request_id)
 
 def versioned(request,response,value):
+    """校验版本化实体更新的必要前提。"""
     response.headers['ETag']='"'+str(value.version)+'"'
     return envelope(request,value)
 
 def identity_router() -> APIRouter:
+    """装配身份认证与账号管理路由依赖。"""
     router=APIRouter(prefix='/api/v1')
 
     @router.post('/auth/login')

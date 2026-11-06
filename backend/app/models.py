@@ -1,3 +1,4 @@
+"""平台开发工具：定义持久化模型、约束和索引。"""
 from app.core.db import Base
 from app.core.types import SchemaManifest
 from app.identity.models import Department, User, Role, UserRole
@@ -62,9 +63,11 @@ TABLE_MODELS = {
 }
 
 def register_models():
+    """确保所有领域模型已导入，再返回统一元数据。"""
     return Base.metadata
 
 def metadata_contract() -> SchemaManifest:
+    """导出表、索引和外键的可核对结构契约。"""
     metadata=register_models()
     return {
         'tables':sorted(metadata.tables),

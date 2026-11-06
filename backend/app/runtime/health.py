@@ -1,3 +1,4 @@
+"""持久后台任务与Outbox：验证Worker与调度器心跳。"""
 import json
 import socket
 import sys
@@ -5,6 +6,7 @@ from sqlalchemy import text
 from app.core.uow import make_uow
 
 def main(kind: str) -> int:
+    """执行本模块声明的命令行入口。"""
     ready=False
     try:
         if kind=='worker':

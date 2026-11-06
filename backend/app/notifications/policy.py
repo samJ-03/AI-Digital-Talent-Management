@@ -1,9 +1,12 @@
+"""邮件配置与交付：限制SMTP主机、TLS和候选人入口地址。"""
 from urllib.parse import urlsplit
 from app.core.errors import DomainError
 
 class MailPolicy:
+    """MailPolicy：邮件配置与交付中的协作类型。"""
     def __init__(self,settings): self.settings=settings
     def require(self,host,port,tls_mode,public_base_url):
+        """验证权限或地址策略，不满足时失败关闭。"""
         if host not in self.settings.allowed_smtp_hosts:
             raise DomainError('SMTP_HOST_DENIED',422,'SMTP目标不在允许范围内')
         local=self.settings.environment in {'dev','test'} and host=='mailpit' and port==1025

@@ -1,3 +1,4 @@
+"""平台开发工具：验证candidate projection的正常与失败场景；测试数据仅用于隔离环境。"""
 from app.assessment.schemas import PaperItemView
 from app.assessment.projections import candidate_item
 

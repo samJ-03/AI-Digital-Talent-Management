@@ -17,6 +17,7 @@ import io
 PNG=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
 
 def main():
+    """执行本模块声明的命令行入口。"""
     settings=Settings.load()
     if settings.environment!='dev': raise RuntimeError('Local probe only')
     store=S3FileStore.from_settings(settings)

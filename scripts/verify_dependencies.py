@@ -1,3 +1,4 @@
+"""平台开发工具：提供verify dependencies命令行工具；仅操作本项目资源。"""
 from __future__ import annotations
 import importlib
 import json

@@ -1,3 +1,4 @@
+"""审计留痕：实现领域操作及事务边界。"""
 from dataclasses import dataclass
 import re
 from typing import Any
@@ -8,6 +9,7 @@ from app.audit.models import AuditLog
 
 @dataclass(frozen=True, slots=True)
 class AuditEvent:
+    """AuditEvent：审计留痕中的协作类型。"""
     action: str
     resource: ResourceScope
     summary: dict[str, Any]
@@ -19,6 +21,7 @@ SAFE_KEYS=frozenset({'reason','changed_fields','before','after','state','status'
     'source_id','target_id','department_id','job_id','attempt_id','count','error_code','enabled','result','revision','role_ids'})
 
 def redact_summary(value: Any, depth: int = 0) -> Any:
+    """只保留允许的审计字段并移除敏感键。"""
     if depth > 6:
         return '[REDACTED]'
     if isinstance(value,dict):
@@ -34,7 +37,9 @@ def redact_summary(value: Any, depth: int = 0) -> Any:
     return '[REDACTED]'
 
 class AuditService:
+    """AuditService：审计留痕中的协作类型。"""
     def append(self, uow: SqlAlchemyUow, actor: ActorContext, event: AuditEvent) -> None:
+        """在当前事务追加脱敏审计记录。 actor为服务端解析的操作者，资源范围仍由服务层验证。uow属于当前调用方事务，回调不得提交外层事务。"""
         if uow.session is None:
             raise RuntimeError('Audit requires an active unit of work')
         if event.result not in {'success','denied','failed'}:

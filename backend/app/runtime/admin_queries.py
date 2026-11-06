@@ -1,11 +1,14 @@
+"""持久后台任务与Outbox：提供不含业务敏感正文的管理员运行诊断。"""
 from sqlalchemy import select
 from app.core.access import AccessPolicy,ResourceScope
 from app.core.errors import DomainError
 from app.runtime.models import BackgroundJob
 
 class RuntimeAdminQueries:
+    """RuntimeAdminQueries：持久后台任务与Outbox中的协作类型。"""
     def __init__(self,uow_factory): self.uow_factory=uow_factory
     def report(self,actor,task_id=None):
+        """返回最小化的管理员技术诊断。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if actor.actor_type!='admin': raise DomainError('PERMISSION_DENIED',403,'需要管理员权限')
         AccessPolicy().require(actor,'runtime.read',ResourceScope('runtime'))
         with self.uow_factory() as uow:

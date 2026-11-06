@@ -1,6 +1,6 @@
 # Agent continuation instructions
 
-This repository implements the user-approved AI digital talent platform. Before editing, read docs/DEVELOPMENT_HANDOFF.md, .execution/progress.md, and the detailed plan at D:/Obsidian仓库/Obsidian/项目/AI数字化人才平台项目/开发计划-2026-11-05/AI数字化人才平台-详细开发todolist.md.
+This repository implements the user-approved AI digital talent platform. Before editing, read docs/DEVELOPMENT_HANDOFF.md and the detailed plan. On the original workstation, the canonical plan is D:/Obsidian仓库/Obsidian/项目/AI数字化人才平台项目/开发计划-2026-11-05/AI数字化人才平台-详细开发todolist.md and .execution/progress.md is a local execution journal. In a fresh clone use docs/specs/09-详细开发todolist.md and docs/specs/00-阅读导航与评审说明.md; .execution and artifacts are intentionally not uploaded. Absolute workstation paths in older records are context, not portable runtime requirements.
 
 - Inspect git status and diff; preserve uncommitted work. Do not reset, clean, or overwrite it from stale staging.
 - The handoff records the last verified checkpoint; inspect actual code and rerun the relevant checks before claiming completion.
@@ -12,3 +12,5 @@ This repository implements the user-approved AI digital talent platform. Before 
 - Output goes to this Obsidian project directory. The original D:/AI数字化人才平台-相关文档 is reference material and temporary staging only.
 - No new features outside approved scope; training is a framework. Admin and HR remain separate; department-private exam/evaluation content never enters shared candidate profiles or embeddings.
 - Continue the current task in the plan. Use meaningful RED/GREEN tests and actual dependency checks; technical probes are not a business acceptance pass.
+
+- User requested descriptive code documentation: document modules/public classes/functions, use JSDoc for frontend boundaries, and include table/column SQLAlchemy comments. Schema comment changes require an additive Alembic migration and refreshed docs/DATABASE.md. Keep .env_example and .env.example identical and never fill committed templates with actual secrets.

@@ -6,6 +6,7 @@ import urllib.request
 from urllib.error import HTTPError
 
 def main():
+    """执行本模块声明的命令行入口。"""
     root=Path(__file__).resolve().parents[1]
     accounts=json.loads((root/'.execution/local-accounts.json').read_text(encoding='utf-8'))
     checks={}

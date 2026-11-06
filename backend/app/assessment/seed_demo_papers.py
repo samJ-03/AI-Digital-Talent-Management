@@ -22,12 +22,14 @@ SAMPLES=[
 ]
 
 def actor_for(login):
+    """从已有身份构造受限的操作者上下文。"""
     with make_uow() as uow:
         user=uow.session.scalar(select(User).where(User.login_name==login))
         if user is None or user.department_id is None: raise RuntimeError('Local HR bootstrap required')
         return resolve_user(uow.session,user),user.department_id
 
 def main():
+    """执行本模块声明的命令行入口。"""
     if Settings.load().environment!='dev': raise RuntimeError('Synthetic local samples only')
     papers=[];actors=[]
     for sample in SAMPLES:

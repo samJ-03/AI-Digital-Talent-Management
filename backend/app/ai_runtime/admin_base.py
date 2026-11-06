@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：复用管理员权限复验、事务和审计。"""
 from contextlib import contextmanager
 from uuid import uuid4
 from sqlalchemy.exc import IntegrityError,DBAPIError
@@ -11,9 +12,11 @@ from app.identity.models import User
 from app.identity.views import resolve_user
 
 class AiAdminBase:
+    """AiAdminBase：模型配置与受控AI执行中的协作类型。"""
     def __init__(self,uow_factory=make_uow): self.uow_factory=uow_factory
 
     def authorize(self,uow,actor,permission):
+        """校验操作者权限与资源范围；不信任前端自报身份。 actor为服务端解析的操作者，资源范围仍由服务层验证。uow属于当前调用方事务，回调不得提交外层事务。"""
         AccessPolicy().require(actor,permission,ResourceScope('system'))
         user=uow.session.get(User,actor.user_id)
         if user is None: raise DomainError('SESSION_REQUIRED',401,'请重新登录')
@@ -23,6 +26,7 @@ class AiAdminBase:
 
     @contextmanager
     def transaction(self,actor,permission):
+        """管理一次带权限复验的业务事务，异常时回滚。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         try:
             with self.uow_factory() as uow:
                 fresh=self.authorize(uow,actor,permission)
@@ -36,4 +40,5 @@ class AiAdminBase:
             raise
 
     def audit(self,uow,actor,action,kind,entity_id,summary):
+        """记录本次领域变更的脱敏审计摘要。 actor为服务端解析的操作者，资源范围仍由服务层验证。uow属于当前调用方事务，回调不得提交外层事务。"""
         AuditService().append(uow,actor,AuditEvent(action,ResourceScope(kind,id=entity_id),summary,'success',request_id_context.get() or str(uuid4())))

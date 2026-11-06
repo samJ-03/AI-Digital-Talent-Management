@@ -1,3 +1,4 @@
+"""平台开发工具：验证smtp adapter的正常与失败场景；测试数据仅用于隔离环境。"""
 from app.notifications.smtp_adapter import SmtpAdapter,MailConnection,MailMessage
 
 MESSAGE=MailMessage('synthetic@example.com','Synthetic','No real invitation','<synthetic@talent.local>')

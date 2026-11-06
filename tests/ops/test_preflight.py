@@ -1,3 +1,4 @@
+"""平台开发工具：验证preflight的正常与失败场景；测试数据仅用于隔离环境。"""
 from __future__ import annotations
 
 import json
@@ -11,6 +12,7 @@ from scripts.preflight import CheckResult, PreflightChecker, PreflightConfig
 
 
 class RuntimeRunner:
+    """RuntimeRunner：平台开发工具中的协作类型。"""
     def __init__(self, missing=None, os_type="linux", python="Python 3.11.17", node="v24.21.0"):
         self.missing, self.os_type, self.python, self.node = missing, os_type, python, node
 

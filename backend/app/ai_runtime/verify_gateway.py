@@ -18,12 +18,14 @@ from app.identity.models import User
 from app.identity.views import resolve_user
 
 class SyntheticProfile(BaseModel):
+    """SyntheticProfile：模型配置与受控AI执行中的输入输出数据契约。"""
     model_config=ConfigDict(extra='forbid',strict=True)
     skill: Literal['Python','Java','unknown']
     years: int|None
     citations: list[Evidence]
 
 def main():
+    """执行本模块声明的命令行入口。"""
     settings=Settings.load()
     if settings.environment!='dev': raise RuntimeError('Local synthetic checks only')
     service=WorkflowConfigService(make_uow)

@@ -1,3 +1,4 @@
+"""后台身份认证与权限：管理员维护账号、角色和部门并保护最后一个管理员。"""
 from contextlib import contextmanager
 from uuid import uuid4
 from argon2 import PasswordHasher
@@ -15,6 +16,7 @@ from app.identity.schemas import UserCreate, UserPatch, DepartmentWrite, RoleWri
 from app.identity.views import resolve_user, user_view, department_view, role_view
 
 class IdentityAdminService:
+    """IdentityAdminService：后台身份认证与权限中的协作类型。"""
     def __init__(self,uow_factory=make_uow):
         self.uow_factory=uow_factory
         self.policy=AccessPolicy()
@@ -82,6 +84,7 @@ class IdentityAdminService:
         raise DomainError('LAST_ADMIN_REQUIRED',422,'必须保留一个可管理账号与角色的管理员')
 
     def create_user(self,actor,cmd: UserCreate):
+        """创建后台账号并安全哈希密码。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self._transaction(actor,'user.manage') as (uow,fresh):
             self._department(uow,cmd.department_id)
             row=User(login_name=cmd.login_name,password_hash=self.hasher.hash(cmd.password.get_secret_value()),department_id=cmd.department_id,status=cmd.status)
@@ -90,6 +93,7 @@ class IdentityAdminService:
             return user_view(uow.session,row)
 
     def update_user(self,actor,user_id: int,cmd: UserPatch,expected_version: int):
+        """以乐观锁更新账号并维护会话失效和管理员保护。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
         with self._transaction(actor,'user.manage') as (uow,fresh):
             row=self._get(uow,User,user_id,expected_version)
             values=cmd.model_dump(exclude_unset=True)
@@ -110,6 +114,7 @@ class IdentityAdminService:
             return user_view(uow.session,row)
 
     def set_roles(self,actor,user_id: int,role_ids: list[int],expected_version: int):
+        """更新角色授予并撤销受影响的旧会话。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
         if len(role_ids)!=len(set(role_ids)) or any(i<=0 for i in role_ids):
             raise DomainError('INVALID_ROLES',422,'角色列表无效')
         with self._transaction(actor,'user.manage') as (uow,fresh):
@@ -128,6 +133,7 @@ class IdentityAdminService:
             return user_view(uow.session,row)
 
     def upsert_department(self,actor,department_id: int|None,cmd: DepartmentWrite):
+        """创建或更新部门并校验层级关系。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self._transaction(actor,'department.manage') as (uow,fresh):
             departments=list(uow.session.scalars(select(Department).order_by(Department.id).with_for_update()))
             by_id={d.id:d for d in departments}
@@ -149,6 +155,7 @@ class IdentityAdminService:
             return department_view(row)
 
     def upsert_role(self,actor,role_id: int|None,cmd: RoleWrite):
+        """创建或更新角色并校验显式权限边界。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self._transaction(actor,'role.manage') as (uow,fresh):
             row=self._get(uow,Role,role_id,cmd.expected_version) if role_id else Role()
             row.code=cmd.code;row.name=cmd.name;row.permission_codes=cmd.permission_codes;row.data_scope=cmd.data_scope;row.status=cmd.status

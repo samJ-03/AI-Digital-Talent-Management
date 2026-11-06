@@ -1,3 +1,4 @@
+"""平台开发工具：组装应用、请求中间件和安全错误响应。"""
 from __future__ import annotations
 
 import logging
@@ -26,6 +27,7 @@ from app.files.service import FileService
 logger = logging.getLogger('talent.api')
 
 def create_app(settings: Settings) -> FastAPI:
+    """根据Settings装配应用、依赖、中间件和路由。"""
     probe = InfrastructureProbe(settings)
     identity = IdentityRuntime(settings)
     file_store=S3FileStore.from_settings(settings) if settings.minio_user and settings.minio_password else None
@@ -117,4 +119,5 @@ def create_app(settings: Settings) -> FastAPI:
     return app
 
 def build_app() -> FastAPI:
+    """从进程环境创建供ASGI服务器加载的应用实例。"""
     return create_app(Settings.load())

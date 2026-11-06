@@ -1,3 +1,4 @@
+"""邮件配置与交付：管理不可变连接修订与启停校验。"""
 from datetime import datetime,timedelta,timezone
 import hashlib,json
 from uuid import uuid4
@@ -14,14 +15,17 @@ from app.runtime.models import OutboxEvent
 from app.notifications.schemas import MaskedMailConfig
 
 def mail_view(row):
+    """构造mail的允许字段视图。"""
     return MaskedMailConfig(id=str(row.id),revision_no=row.revision_no,smtp_host=row.smtp_host,smtp_port=row.smtp_port,tls_mode=row.tls_mode,
         sender_address=row.sender_address,username_configured=bool(row.username),secret_configured=bool(row.secret_ciphertext),public_base_url=row.public_base_url,state=row.state,version=row.row_version)
 
 def halt_pending(session,config_id):
+    """停止尚未发送的通知，保留原邮件配置修订引用。"""
     session.execute(update(Notification).where(Notification.mail_config_id==config_id,Notification.status=='pending').values(
         status='failed',last_error_code='MAIL_CONFIG_DISABLED',row_version=Notification.row_version+1))
 
 class MailConfigService(AiAdminBase):
+    """MailConfigService：邮件配置与交付中的协作类型。"""
     def __init__(self,uow_factory,cipher,settings,idempotency_key=None):
         super().__init__(uow_factory);self.cipher=cipher;self.settings=settings;self.key=idempotency_key
 
@@ -35,6 +39,7 @@ class MailConfigService(AiAdminBase):
         return IdempotencyService(self.uow_factory).execute(actor,operation,self.key,digest,run)
 
     def get(self,actor,config_id):
+        """读取指定私有对象或会话。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'mail_config.manage')
             row=uow.session.get(MailConfig,config_id)
@@ -42,6 +47,7 @@ class MailConfigService(AiAdminBase):
             return mail_view(row)
 
     def create(self,actor,cmd):
+        """创建经过校验的领域对象，并返回其视图。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         MailPolicy(self.settings).require(cmd.smtp_host,cmd.smtp_port,cmd.tls_mode,cmd.public_base_url)
         if cmd.secret and self.cipher is None: raise DomainError('SECRET_KEY_UNAVAILABLE',503,'加密配置不可用')
         payload=cmd.model_dump(mode='json',exclude={'secret'})
@@ -58,6 +64,7 @@ class MailConfigService(AiAdminBase):
         return self.get(actor,result.entity_id)
 
     def test(self,actor,config_id: int,recipient: str):
+        """验证连接能力或提交异步配置测试；以返回状态为准。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if self.cipher is None: raise DomainError('SECRET_KEY_UNAVAILABLE',503,'加密配置不可用')
         def command(uow,fresh):
             row=uow.session.scalar(select(MailConfig).where(MailConfig.id==config_id).with_for_update())
@@ -94,5 +101,9 @@ class MailConfigService(AiAdminBase):
         result=self._execute(actor,'mail_config.activate' if activate else 'mail_config.disable',{'id':config_id,'version':expected_version,'reason':reason},command)
         return self.get(actor,result.entity_id)
 
-    def activate(self,actor,config_id,expected_version,reason): return self._change(actor,config_id,expected_version,reason,True)
-    def disable(self,actor,config_id,expected_version,reason): return self._change(actor,config_id,expected_version,reason,False)
+    def activate(self,actor,config_id,expected_version,reason):
+        """激活经过验证的配置，并保持单一有效修订。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
+        return self._change(actor,config_id,expected_version,reason,True)
+    def disable(self,actor,config_id,expected_version,reason):
+        """停用配置并阻止尚未开始的后续动作。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
+        return self._change(actor,config_id,expected_version,reason,False)

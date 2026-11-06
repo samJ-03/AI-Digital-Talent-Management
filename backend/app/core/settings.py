@@ -1,8 +1,10 @@
+"""公共基础设施：加载TALENT_环境配置并校验生产环境约束。"""
 from typing import Literal
 from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    """Settings：公共基础设施中的协作类型。"""
     model_config = SettingsConfigDict(env_prefix='TALENT_', extra='ignore')
     environment: Literal['dev','test','production'] = 'dev'
     database_url: SecretStr
@@ -24,6 +26,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode='after')
     def validate_production(self):
+        """校验生产监控令牌与HTTPS来源约束。"""
         if self.environment == 'production' and len(self.monitor_token.get_secret_value()) < 32:
             raise ValueError('Production monitor token must contain at least 32 characters')
         if self.environment == 'production' and any(not origin.startswith('https://') for origin in self.trusted_origins):
@@ -32,4 +35,5 @@ class Settings(BaseSettings):
 
     @classmethod
     def load(cls) -> 'Settings':
+        """从进程环境加载并校验应用配置。"""
         return cls()

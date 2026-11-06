@@ -1,3 +1,4 @@
+"""私有文件：实现领域操作及事务边界。"""
 from dataclasses import dataclass,field
 from datetime import datetime,timedelta
 import hashlib
@@ -26,12 +27,14 @@ from app.runtime.job_service import utc_naive
 
 @dataclass(frozen=True,slots=True)
 class UploadDescriptor:
+    """UploadDescriptor：私有文件中的协作类型。"""
     name: str
     content_type: str
     size: int
     stream: BinaryIO=field(repr=False)
 
 class FileView(BaseModel):
+    """FileView：私有文件中的输入输出数据契约。"""
     id: str
     name: str
     mime: str
@@ -40,12 +43,14 @@ class FileView(BaseModel):
 
 @dataclass(frozen=True,slots=True)
 class DownloadGrant:
+    """DownloadGrant：私有文件中的协作类型。"""
     name: str
     mime: str
     size: int
     stream: BinaryIO=field(repr=False)
 
 class FileService:
+    """FileService：私有文件中的协作类型。"""
     def __init__(self,store,uow_factory=make_uow,clock=None,max_file_bytes=20*1024*1024,max_pages=100):
         self.store=store;self.uow_factory=uow_factory;self.clock=clock or Clock()
         self.max_file_bytes=max_file_bytes;self.max_pages=max_pages
@@ -53,6 +58,7 @@ class FileService:
         register_models()
 
     def stage(self,actor,upload: UploadDescriptor) -> FileView:
+        """按实际大小、结构和类型校验上传文件并暂存到私有桶。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if actor.actor_type!='hr' or not actor.permissions&{'import.write','knowledge.write'}:
             raise DomainError('PERMISSION_DENIED',403,'无上传权限')
         if type(upload.size) is not int or upload.size<0:
@@ -94,6 +100,7 @@ class FileService:
         return links
 
     def authorized_download(self,actor,file_id: int) -> DownloadGrant:
+        """校验持久化业务归属后返回私有文件流。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if actor.actor_type!='hr': raise DomainError('PERMISSION_DENIED',403,'无下载权限')
         with self.uow_factory() as uow:
             row=uow.session.get(StoredFile,file_id)
@@ -112,6 +119,7 @@ class FileService:
         return DownloadGrant(name,mime,size,self.store.get(key))
 
     def attach(self,uow,actor,file_id: int) -> StoredFile:
+        """在调用方业务事务中关联已经校验的私有文件。 actor为服务端解析的操作者，资源范围仍由服务层验证。uow属于当前调用方事务，回调不得提交外层事务。"""
         row=uow.session.scalar(select(StoredFile).where(StoredFile.id==file_id).with_for_update())
         if (actor.actor_type!='hr' or row is None or row.bucket!=self.store.bucket or row.uploader_id!=actor.user_id or row.status!='staged'):
             raise DomainError('FILE_NOT_STAGED',409,'文件不处于可关联状态')
@@ -127,6 +135,7 @@ class FileService:
         return False
 
     def cleanup_orphans(self,before: datetime) -> int:
+        """只清理超过宽限期且未被业务引用的本项目对象。"""
         cutoff=utc_naive(before)
         if cutoff>utc_naive(self.clock.now())-timedelta(hours=1):
             raise ValueError('Orphan cleanup requires at least one hour of grace')

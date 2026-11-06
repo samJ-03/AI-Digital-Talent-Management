@@ -5,6 +5,7 @@ from app.ai_runtime.endpoint_policy import EndpointPolicy
 from app.ai_runtime.generation_types import RawModelResponse
 
 class OllamaAdapter:
+    """OllamaAdapter：模型配置与受控AI执行中的协作类型。"""
     def __init__(self, connection, system_prompt: str, transport=None):
         self.connection=connection;self.system_prompt=system_prompt;self.transport=transport
 
@@ -16,6 +17,7 @@ class OllamaAdapter:
             raise ProbeFailure('MODEL_DIGEST_CHANGED')
 
     def generate(self,request) -> RawModelResponse:
+        """请求JSON生成并返回内部模型响应或经过验证的结果。"""
         import json
         c=self.connection
         endpoint=EndpointPolicy().require(c.provider_type,c.base_url,c.model_name)

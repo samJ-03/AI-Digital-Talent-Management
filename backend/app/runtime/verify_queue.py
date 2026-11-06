@@ -10,6 +10,7 @@ from app.runtime.job_service import BackgroundJobService,JobSpec
 from app.runtime.models import BackgroundJob,OutboxEvent
 
 def main():
+    """执行本模块声明的命令行入口。"""
     if Settings.load().environment!='dev': raise RuntimeError('Local diagnostic only')
     key='local-queue-probe:'+uuid4().hex
     with make_uow() as uow:

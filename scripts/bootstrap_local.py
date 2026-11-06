@@ -7,6 +7,7 @@ import subprocess
 import sys
 
 def main():
+    """执行本模块声明的命令行入口。"""
     root=Path(__file__).resolve().parents[1]
     destination=root/'.execution/local-accounts.json'
     destination.parent.mkdir(exist_ok=True)

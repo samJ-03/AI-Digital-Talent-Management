@@ -1,3 +1,4 @@
+"""题库、试卷与考试：管理题库、题目修订和人工批准。"""
 from uuid import uuid4
 from sqlalchemy import select
 from app.core.access import ResourceScope
@@ -12,6 +13,7 @@ from app.assessment.schemas import QuestionDraft,QuestionBankCreate
 from app.assessment.views import bank_view,question_view
 
 class QuestionService(HrServiceBase):
+    """QuestionService：题库、试卷与考试中的协作类型。"""
     def _bank_scope(self,bank_id):
         with self.uow_factory() as uow:
             bank=uow.session.get(QuestionBank,bank_id)
@@ -25,6 +27,7 @@ class QuestionService(HrServiceBase):
         return self._bank_scope(bank_id)
 
     def validate_sources(self,uow,actor,sources):
+        """校验题目来源引用的结构与完整性。 actor为服务端解析的操作者，资源范围仍由服务层验证。uow属于当前调用方事务，回调不得提交外层事务。"""
         for source in sources:
             kind=source.source_type;source_id=source.source_id
             if kind=='knowledge_chunk':
@@ -52,12 +55,14 @@ class QuestionService(HrServiceBase):
         return row
 
     def get(self,actor,question_id):
+        """读取指定私有对象或会话。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=self._question_scope(question_id)
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'question.read',scope)
             return question_view(uow.session.get(Question,question_id))
 
     def create_bank(self,actor,cmd: QuestionBankCreate):
+        """创建当前授权部门的题库。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=ResourceScope('question_bank',department_id=cmd.department_id)
         def command(uow,fresh):
             department=uow.session.get(Department,cmd.department_id)
@@ -72,6 +77,7 @@ class QuestionService(HrServiceBase):
             return bank_view(uow.session.get(QuestionBank,result.entity_id))
 
     def create(self,actor,cmd: QuestionDraft):
+        """创建经过校验的领域对象，并返回其视图。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         scope=self._bank_scope(cmd.bank_id)
         def command(uow,fresh):
             row=self._create_row(uow,fresh,cmd,str(uuid4()),1)
@@ -80,6 +86,7 @@ class QuestionService(HrServiceBase):
         return self.get(actor,result.entity_id)
 
     def revise(self,actor,question_id: int,cmd: QuestionDraft,reason: str):
+        """创建题目新修订，保留历史修订。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if not reason.strip(): raise DomainError('REASON_REQUIRED',422,'修订原因不可为空')
         scope=self._question_scope(question_id)
         if cmd.bank_id!=scope.id: raise DomainError('QUESTION_BANK_IMMUTABLE',422,'修订不能跨题库移动题目')
@@ -94,6 +101,7 @@ class QuestionService(HrServiceBase):
         return self.get(actor,result.entity_id)
 
     def approve(self,actor,question_id: int,reason: str):
+        """批准已校验的题目修订。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if not reason.strip(): raise DomainError('REASON_REQUIRED',422,'审核原因不可为空')
         scope=self._question_scope(question_id)
         def command(uow,fresh):

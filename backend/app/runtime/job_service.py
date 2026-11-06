@@ -1,3 +1,4 @@
+"""持久后台任务与Outbox：管理任务入队、租约、重试和终态转换。"""
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime,timedelta,timezone
@@ -19,10 +20,12 @@ REF_REVISIONS=frozenset({'submission_revision','parser_revision','profile_revisi
 
 @dataclass(frozen=True,slots=True)
 class TerminalJobFailure:
+    """TerminalJobFailure：持久后台任务与Outbox中的协作类型。"""
     error_code: str
 
 @dataclass(frozen=True,slots=True)
 class JobSpec:
+    """JobSpec：持久后台任务与Outbox中的协作类型。"""
     job_type: str
     entity_type: str
     entity_id: int
@@ -31,16 +34,19 @@ class JobSpec:
 
 @dataclass(frozen=True,slots=True)
 class JobLease:
+    """JobLease：持久后台任务与Outbox中的协作类型。"""
     job_id: int
     lease_owner: str
     lease_until: datetime
 
 def utc_naive(value: datetime) -> datetime:
+    """把时间规范化为数据库使用的无时区UTC值。"""
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError('UTC operation requires an aware datetime')
     return value.astimezone(timezone.utc).replace(tzinfo=None)
 
 def add_dispatch(session,job: BackgroundJob,now: datetime) -> None:
+    """在当前事务追加队列交付所需的Outbox记录。"""
     key=f'dispatch:{job.id}:{job.attempt_count}'
     existing=session.scalar(select(OutboxEvent).where(OutboxEvent.event_key==key).with_for_update())
     if existing is None:
@@ -50,6 +56,7 @@ def add_dispatch(session,job: BackgroundJob,now: datetime) -> None:
         existing.state='pending';existing.next_attempt_at=now;existing.lease_until=None
 
 class BackgroundJobService:
+    """BackgroundJobService：持久后台任务与Outbox中的协作类型。"""
     MAX_ATTEMPTS=3
     LEASE_SECONDS=300
     def __init__(self,uow_factory=make_uow,clock: Clock|None=None):
@@ -57,6 +64,7 @@ class BackgroundJobService:
         self.clock=clock or Clock()
 
     def enqueue(self,uow: SqlAlchemyUow,spec: JobSpec) -> int:
+        """在业务同一事务保存持久任务及交付事件。 uow属于当前调用方事务，回调不得提交外层事务。"""
         if spec.job_type not in JOB_TYPES or spec.entity_type not in ENTITY_TYPES:
             raise DomainError('INVALID_JOB_TYPE',422,'任务类型或关联类型无效')
         if type(spec.entity_id) is not int or spec.entity_id<=0 or not re.fullmatch(r'[a-zA-Z0-9_.:-]{1,190}',spec.idempotency_key):
@@ -88,6 +96,7 @@ class BackgroundJobService:
         return job.id
 
     def claim(self,job_id: int,worker_id: str) -> JobLease|None:
+        """原子领取任务租约，拒绝重复或已失效的执行权。"""
         if not re.fullmatch(r'[a-zA-Z0-9_.:-]{1,60}',worker_id):
             raise ValueError('Invalid worker identifier')
         now=utc_naive(self.clock.now())
@@ -125,12 +134,14 @@ class BackgroundJobService:
         job.lease_owner=None;job.lease_until=None;job.next_run_at=None
 
     def complete(self,lease: JobLease,result: ResultRef) -> None:
+        """在有效租约下完成任务并保存结果引用。"""
         with self.uow_factory() as uow:
             job=self._owned(uow,lease)
             self._success(job,result)
             uow.commit()
 
     def run_atomic(self,lease: JobLease,handler: Callable) -> None:
+        """校验有效租约并在同一事务执行领域回调与任务完成。"""
         with self.uow_factory() as uow:
             job=self._owned(uow,lease)
             transaction=uow.session.get_transaction()
@@ -149,6 +160,7 @@ class BackgroundJobService:
             uow.commit()
 
     def fail(self,lease: JobLease,error_code: str,retryable: bool=True) -> None:
+        """在有效租约下记录脱敏错误并决定重试或失败终态。"""
         if error_code not in {'HANDLER_FAILED','HANDLER_NOT_REGISTERED','DEPENDENCY_UNAVAILABLE','INVALID_OUTPUT'}:
             error_code='HANDLER_FAILED'
         with self.uow_factory() as uow:
@@ -159,10 +171,12 @@ class BackgroundJobService:
             uow.commit()
 
 class JobRunner:
+    """JobRunner：持久后台任务与Outbox中的协作类型。"""
     def __init__(self,service: BackgroundJobService,handlers: dict[str,Callable]):
         self.service=service;self.handlers=dict(handlers)
 
     def execute(self,job_id: int) -> None:
+        """执行受控操作；具体事务与幂等边界由当前服务定义。"""
         lease=self.service.claim(job_id,'worker')
         if lease is None: return
         with self.service.uow_factory() as uow:

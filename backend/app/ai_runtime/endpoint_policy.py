@@ -1,15 +1,19 @@
+"""模型配置与受控AI执行：校验供应商地址与模型白名单，拒绝重定向目的地及未授权代理。"""
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 from app.core.errors import DomainError
 
 @dataclass(frozen=True,slots=True)
 class ProviderEndpoint:
+    """ProviderEndpoint：模型配置与受控AI执行中的协作类型。"""
     family: str
     base_url: str
     capability: str
 
 class EndpointPolicy:
+    """EndpointPolicy：模型配置与受控AI执行中的协作类型。"""
     def require(self,provider_type: str,base_url: str,model_name: str) -> ProviderEndpoint:
+        """验证权限或地址策略，不满足时失败关闭。"""
         try: url=urlsplit(base_url)
         except ValueError: raise DomainError('MODEL_URL_DENIED',422,'模型地址不在允许范围内') from None
         if (url.username or url.password or url.query or url.fragment or '%' in base_url or '\\' in base_url

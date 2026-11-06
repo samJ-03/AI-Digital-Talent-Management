@@ -12,15 +12,18 @@ from minio import Minio
 from pymilvus import MilvusClient
 
 class ProbeBase(DeclarativeBase):
+    """ProbeBase：平台开发工具中的协作类型。"""
     pass
 
 class EnvironmentProbe(ProbeBase):
+    """EnvironmentProbe：平台开发工具中的协作类型。"""
     __tablename__ = 'talent_environment_probe'
     __table_args__ = {'prefixes':['TEMPORARY']}
     id: Mapped[str] = mapped_column(String(40),primary_key=True)
     value: Mapped[str] = mapped_column(String(100))
 
 def mysql_probe():
+    """在本项目数据库连接中创建临时探针表，验证读写并清理。"""
     engine=create_engine(os.environ['TALENT_DATABASE_URL'],connect_args={'connect_timeout':5})
     try:
         with engine.connect() as connection:
@@ -38,6 +41,7 @@ def mysql_probe():
         engine.dispose()
 
 def redis_probe():
+    """验证带过期时间的合成键读写，完成后只删除自己的键。"""
     client=Redis.from_url(os.environ['TALENT_REDIS_URL'],socket_timeout=5)
     key='talent:preflight:'+uuid4().hex
     try:
@@ -48,6 +52,7 @@ def redis_probe():
         client.close()
 
 def minio_probe():
+    """在专用探针桶验证合成对象读写，完成后删除自己的对象。"""
     client=Minio('minio:9000',access_key=os.environ['TALENT_MINIO_USER'],secret_key=os.environ['TALENT_MINIO_PASSWORD'],secure=False)
     bucket='talent-preflight'
     key=uuid4().hex
@@ -63,6 +68,7 @@ def minio_probe():
         client.remove_object(bucket,key)
 
 def milvus_probe():
+    """创建独立的8维探针集合验证写入和近邻检索，随后删除集合。"""
     client=MilvusClient(uri='http://milvus:19530',timeout=30)
     name='preflight_'+uuid4().hex[:20]
     try:
@@ -75,6 +81,7 @@ def milvus_probe():
         client.close()
 
 def mail_probe():
+    """只通过SMTP NOOP验证本地Mailpit协议，不发送邮件。"""
     with smtplib.SMTP('mailpit',1025,timeout=5) as client:
         assert client.noop()[0]==250
 

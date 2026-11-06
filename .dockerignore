@@ -8,3 +8,11 @@ artifacts
 .env.*
 **/__pycache__
 **/.pytest_cache
+
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.sql
+**/*.dump
+**/*.log

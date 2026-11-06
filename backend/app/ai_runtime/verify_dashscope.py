@@ -11,6 +11,7 @@ from app.identity.models import User
 from app.identity.views import resolve_user
 
 def main():
+    """执行本模块声明的命令行入口。"""
     settings=Settings.load()
     if settings.environment!='dev': raise RuntimeError('Local probe only')
     if not settings.dashscope_api_key or not settings.encryption_key:

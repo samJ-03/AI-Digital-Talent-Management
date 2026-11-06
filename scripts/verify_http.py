@@ -10,6 +10,7 @@ env=dict(line.split('=',1) for line in (root/'.env').read_text('utf-8').splitlin
 base='http://localhost:13000'
 
 def get(path, headers=None):
+    """读取指定私有对象或会话。"""
     try:
         response=urlopen(Request(base+path,headers=headers or {}),timeout=10)
     except HTTPError as error:

@@ -1,3 +1,4 @@
+"""持久后台任务与Outbox：执行授权后的只读查询与投影。"""
 from pydantic import BaseModel
 from app.core.errors import DomainError
 from app.core.resource_scope import ResourceResolver
@@ -7,6 +8,7 @@ from app.runtime.models import BackgroundJob
 SAFE_ERROR_CODES=frozenset({'UNKNOWN_JOB_TYPE','ATTEMPT_LIMIT','HANDLER_FAILED','HANDLER_NOT_REGISTERED','DEPENDENCY_UNAVAILABLE','INVALID_OUTPUT'})
 
 class TaskView(BaseModel):
+    """TaskView：持久后台任务与Outbox中的输入输出数据契约。"""
     id: str
     entity_type: str
     entity_id: str
@@ -16,12 +18,14 @@ class TaskView(BaseModel):
     retryable: bool
 
 class RuntimeQueries:
+    """RuntimeQueries：持久后台任务与Outbox中的协作类型。"""
     def __init__(self,uow_factory=make_uow):
         self.uow_factory=uow_factory
         self.resources=ResourceResolver()
 
     def task(self,actor,task_id: int) -> TaskView:
         # API098 is HR-only. Administrators use a separate sanitized runtime view.
+        """读取当前HR有权访问的持久任务状态。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if actor.actor_type!='hr':
             raise DomainError('PERMISSION_DENIED',403,'无操作权限')
         with self.uow_factory() as uow:

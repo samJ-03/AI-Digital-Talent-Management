@@ -1,3 +1,4 @@
+"""私有文件：校验不可信输入或输出，拒绝不满足约束的数据。"""
 from pathlib import PurePosixPath
 import struct
 import zipfile
@@ -7,9 +8,12 @@ from app.core.errors import DomainError
 
 MIMES={'.pdf':'application/pdf','.doc':'application/msword','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg'}
 
-def invalid(): return DomainError('INVALID_FILE_FORMAT',422,'文件扩展名、内容类型或文件内容不符合要求')
+def invalid():
+    """构造明确的文件校验失败结果。"""
+    return DomainError('INVALID_FILE_FORMAT',422,'文件扩展名、内容类型或文件内容不符合要求')
 
 def validate_upload(name: str,mime: str,stream,max_pages: int=100) -> str:
+    """验证上传真实类型、大小、页数和容器结构。"""
     if not name or len(name)>255 or any(c in name for c in ('\x00','\r','\n')): raise invalid()
     suffix=PurePosixPath(name.replace('\\','/')).suffix.lower()
     expected=MIMES.get(suffix)

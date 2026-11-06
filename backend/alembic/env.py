@@ -1,3 +1,4 @@
+"""平台开发工具：实现env领域协作。"""
 from alembic import context
 from sqlalchemy import create_engine
 from app.core.settings import Settings

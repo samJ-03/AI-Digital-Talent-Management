@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：管理不可变连接修订与启停校验。"""
 from dataclasses import dataclass
 from sqlalchemy import select,func
 from app.ai_runtime.admin_base import AiAdminBase
@@ -9,16 +10,19 @@ from app.core.errors import DomainError
 
 @dataclass(frozen=True,slots=True)
 class ProbeConfig:
+    """ProbeConfig：模型配置与受控AI执行中的协作类型。"""
     provider_type: str
     base_url: str
     model_name: str
     embedding_dimension: int|None
 
 class ModelConfigService(AiAdminBase):
+    """ModelConfigService：模型配置与受控AI执行中的协作类型。"""
     def __init__(self,uow_factory,cipher,probe):
         super().__init__(uow_factory);self.cipher=cipher;self.probe=probe
 
     def create_revision(self,actor,cmd: ModelConfigCreate):
+        """创建不可变连接修订，秘密仅以密文持久化。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.transaction(actor,'model.manage') as (uow,fresh):
             endpoint=EndpointPolicy().require(cmd.provider_type,cmd.base_url,cmd.model_name)
             list(uow.session.scalars(select(WorkflowConfig).order_by(WorkflowConfig.id).with_for_update()))
@@ -35,6 +39,7 @@ class ModelConfigService(AiAdminBase):
             return model_view(row)
 
     def test(self,actor,config_id: int):
+        """验证连接能力或提交异步配置测试；以返回状态为准。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'model.manage')
             row=uow.session.get(ModelConfig,config_id)
@@ -60,7 +65,9 @@ class ModelConfigService(AiAdminBase):
         return result
 
 class WorkflowConfigService(AiAdminBase):
+    """WorkflowConfigService：模型配置与受控AI执行中的协作类型。"""
     def configure(self,actor,task_type: str,cmd: WorkflowWrite,expected_version: int):
+        """以乐观锁更新固定流程配置并校验关联修订。 actor为服务端解析的操作者，资源范围仍由服务层验证。expected_version必须匹配当前row_version，否则拒绝覆盖。"""
         if task_type not in TASK_TYPES: raise DomainError('INVALID_TASK_TYPE',422,'不支持的固定流程')
         with self.transaction(actor,'workflow.manage') as (uow,fresh):
             row=uow.session.scalar(select(WorkflowConfig).where(WorkflowConfig.task_type==task_type).with_for_update())
@@ -85,6 +92,7 @@ class WorkflowConfigService(AiAdminBase):
             return workflow_view(row)
 
     def list(self,actor):
+        """读取当前服务允许展示的对象集合。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'workflow.manage')
             return [workflow_view(row) for row in uow.session.scalars(select(WorkflowConfig).where(WorkflowConfig.task_type.in_(TASK_TYPES)).order_by(WorkflowConfig.id))]

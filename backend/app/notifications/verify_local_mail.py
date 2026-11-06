@@ -14,6 +14,7 @@ from app.notifications.models import MailConfig
 from app.runtime.models import BackgroundJob
 
 def main():
+    """执行本模块声明的命令行入口。"""
     settings=Settings.load()
     if settings.environment!='dev': raise RuntimeError('Local Mailpit probe only')
     cipher=SecretCipher(settings.encryption_key.get_secret_value())

@@ -1,3 +1,4 @@
+"""平台开发工具：验证factories的正常与失败场景；测试数据仅用于隔离环境。"""
 from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import uuid4

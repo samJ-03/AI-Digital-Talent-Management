@@ -1,3 +1,4 @@
+"""持久后台任务与Outbox：事务外投递已提交事件，仅向队列传递任务ID。"""
 from dataclasses import dataclass
 from datetime import timedelta
 from sqlalchemy import select,or_,and_,update
@@ -8,15 +9,18 @@ from app.runtime.models import OutboxEvent
 
 @dataclass(frozen=True,slots=True)
 class DispatchReport:
+    """DispatchReport：持久后台任务与Outbox中的协作类型。"""
     claimed: int
     sent: int
     failed: int
 
 class OutboxDispatcher:
+    """OutboxDispatcher：持久后台任务与Outbox中的协作类型。"""
     def __init__(self,uow_factory=make_uow,publisher=None,clock: Clock|None=None):
         self.uow_factory=uow_factory;self.publisher=publisher;self.clock=clock or Clock()
 
     def dispatch_due(self,limit: int) -> DispatchReport:
+        """投递已到期且尚未确认交付的Outbox事件。"""
         if not 1<=limit<=1000: raise ValueError('Dispatch limit must be 1..1000')
         now=utc_naive(self.clock.now())
         claimed=[]

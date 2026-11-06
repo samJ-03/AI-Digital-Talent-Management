@@ -1,3 +1,4 @@
+"""邮件配置与交付：进行真实SMTP交付并区分接受、失败和结果未知。"""
 from dataclasses import dataclass,field
 from email.message import EmailMessage
 import smtplib
@@ -5,6 +6,7 @@ import ssl
 
 @dataclass(frozen=True,slots=True)
 class MailConnection:
+    """MailConnection：邮件配置与交付中的协作类型。"""
     config_id: int
     host: str
     port: int
@@ -15,6 +17,7 @@ class MailConnection:
 
 @dataclass(frozen=True,slots=True)
 class MailMessage:
+    """MailMessage：邮件配置与交付中的协作类型。"""
     recipient: str=field(repr=False)
     subject: str
     body: str=field(repr=False)
@@ -22,15 +25,18 @@ class MailMessage:
 
 @dataclass(frozen=True,slots=True)
 class DeliveryResult:
+    """DeliveryResult：邮件配置与交付中的协作类型。"""
     status: str
     provider_message_id: str|None=None
     error_code: str|None=None
 
 class SmtpAdapter:
+    """SmtpAdapter：邮件配置与交付中的协作类型。"""
     def __init__(self,cipher=None,smtp_factory=None,ssl_factory=None):
         self.cipher=cipher;self.smtp_factory=smtp_factory or smtplib.SMTP;self.ssl_factory=ssl_factory or smtplib.SMTP_SSL
 
     def send(self,config: MailConnection,message: MailMessage) -> DeliveryResult:
+        """进行SMTP交付，区分接受、失败与结果未知。"""
         client=None;connected=False
         try:
             if config.tls_mode=='tls': client=self.ssl_factory(timeout=5,context=ssl.create_default_context())

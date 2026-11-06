@@ -1,3 +1,4 @@
+"""平台开发工具：验证outbox的正常与失败场景；测试数据仅用于隔离环境。"""
 import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime,timedelta,timezone

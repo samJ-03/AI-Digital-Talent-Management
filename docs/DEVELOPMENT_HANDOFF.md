@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-06；状态：Docker已恢复，T09完成，最终完整测试186通过；下一步T12岗位版本与自动邀请配置。
+更新：2026-11-06；状态：Docker已恢复，T09完成，上传整理完成，最终完整测试190通过；下一步T12岗位版本与自动邀请配置。
 
 ## 1. 从这里继续
 
@@ -30,17 +30,17 @@
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
 |T12～T43|未完成|按依赖推进，生产发布需单独授权|
 
-最新完整测试：artifacts/t09-clean-final-suite.log，186 passed in118.16s。
+最新完整测试：artifacts/github-upload-final-suite.log，190 passed in155.06s；前端lint/typecheck/build通过。T09原始验收为186通过。
 真实Mailpit：artifacts/t10-live-mailpit.json，config1已验证并active，只有本地测试信。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
 不要声称招聘业务已跑通；当前完成的是基础设施、账号和任务框架。
 证据报告：artifacts/t01-*～t05-*；执行流水：.execution/progress.md；任务摘录：.execution/T04-brief.md、T05-brief.md、T06-brief.md。
-artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录。未推送远端；本机磁盘损坏不在这些本地记录的保障范围内。
+artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录。GitHub目标为https://github.com/samJ-03/AI-Digital-Talent-Management，已配置origin；同步状态以实际origin/main与Git记录为准。本地执行证据和秘密不上传，未做生产部署。
 
 ## 3. 当前工作与下一步
 
-已完成T01～T11（T09最后收口），T09代码提交4641161；最终完整186通过。下一步按计划T12：岗位版本、发布/暂停/关闭、卷归属与自动邀请就绪门。自动邀请默认关闭，false→true仅追加invite.scan持久事件；T23前不能把尚未实现的实际邮件处理器称已完成。没有发布/推送/上线。
+已完成T01～T11（T09最后收口），T09代码提交4641161；最终完整186通过。下一步按计划T12：岗位版本、发布/暂停/关闭、卷归属与自动邀请就绪门。自动邀请默认关闭，false→true仅追加invite.scan持久事件；T23前不能把尚未实现的实际邮件处理器称已完成。用户现已明确授权上传GitHub；没有生产部署授权。
 
 T09内部契约见docs/MODEL_GATEWAY_CONTRACT.md。AiConfigSnapshot包含config_revision；生成核对发布提示词/schema、证据引用和模型配置；只有校验结果进入AiRun。EmbeddingBatch带model_config_id/revision_no/model_name，云端model_digest=None，本地核验真实digest。T20按配置修订/维度隔离向量，私有考试评价不得进入共享画像/embedding。
 
@@ -101,3 +101,13 @@ T09有效RED：畸形协议JSON2失败3通过，修复错误归类。此前定�
 验收详情artifacts/t09-verification.md，内部契约docs/MODEL_GATEWAY_CONTRACT.md，详细计划T09已全部勾选。仅T09基础能力完成，招聘业务及业务页面仍待后续任务，不称整套系统跑通。下一步T12。
 
 若之后强制中断pytest，先确认旧测试容器不再运行，再检查隔离talent_test残留；测试中断可使管理员数量等全局断言受污染。迁移/清理只准严格验证后的talent_test，禁止动talent_dev或用户已有库；不能通过删除业务保护来使测试通过。
+
+### GitHub首次上传整理（2026-11-06）
+
+目标仓库samJ-03/AI-Digital-Talent-Management为用户创建的公开仓库，上传已明确授权。本地开发分支继续feat/recruitment-v1，首次上传到main并保留既有提交历史；远程同步状态应核对实际Git分支，不凭聊天推断。
+
+新增.env_example并与.env.example保持一致，包含全部实际读取的配置、用途、单位、必填/可选说明；scripts/init_env.py仅创建新文件、生成随机独立凭据，不覆盖已有.env或打印秘密。README提供克隆、运行时镜像构建、Compose、迁移、账号初始化和隔离测试的完整命令。
+
+源码文档覆盖148个Python模块、176个类、208个公开函数/方法，前端边界有JSDoc；原135个修改的Python文件以AST比较确认可执行语句不变（排除docstring和mapped_column.comment）。40表478字段都具备中文SQL COMMENT和模型类说明。追加0005_schema_comments及0006_comment_semantics，不改原迁移；字段定义和数据保真测试通过，开发库迁移已应用，alembic check无漂移。docs/DATABASE.md为ORM导出字典，docs/specs包含8份评审基线及计划仓库副本，跨机器续接见AGENTS.md。
+
+验证：github-comments-red.log明确字段comment缺失失败；真实MySQL注释/迁移保真2通过；github-upload-final-suite.log为最终190通过，前端lint/typecheck/build通过。上传前检查工作文件与全部可达Git历史，未发现配置的真实秘密或私有文件路径入历史；.env、.execution、artifacts均忽略，不上传简历/答卷/账号/密钥/数据库导出。没有重复付费模型探测，没有对外招聘邮件。

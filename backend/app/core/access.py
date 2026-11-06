@@ -1,8 +1,10 @@
+"""公共基础设施：计算权限与资源数据范围，分离管理员和HR身份。"""
 from dataclasses import dataclass, field
 from app.core.errors import DomainError
 
 @dataclass(frozen=True, slots=True)
 class ActorContext:
+    """ActorContext：公共基础设施中的协作类型。"""
     actor_type: str
     user_id: int | None = None
     candidate_id: int | None = None
@@ -30,27 +32,32 @@ class ActorContext:
 
     @property
     def scope_key(self) -> str:
+        """生成幂等主体的稳定范围标识。"""
         if self.actor_type == 'candidate':
             return f'candidate:{self.candidate_id}:attempt:{self.attempt_id}'
         return f'{self.actor_type}:{self.user_id}' if self.user_id is not None else 'system'
 
 @dataclass(frozen=True, slots=True)
 class ResourceScope:
+    """ResourceScope：公共基础设施中的协作类型。"""
     kind: str
     id: int | None = None
     department_id: int | None = None
     shared: bool = False
 
 class PermissionDenied(DomainError):
+    """PermissionDenied：公共基础设施中的协作类型。"""
     def __init__(self):
         super().__init__('PERMISSION_DENIED',403,'无操作权限')
 
 class AccessPolicy:
+    """AccessPolicy：公共基础设施中的协作类型。"""
     SHARED_KINDS = frozenset({'talent','candidate','resume','profile','knowledge'})
     ADMIN_PREFIXES = frozenset({'user','role','department','model','prompt','workflow','mail_config','runtime','audit','system'})
     CANDIDATE_PERMISSIONS = frozenset({'exam.access','exam.start','exam.read','exam.answer','exam.submit','exam.status'})
 
     def require(self, actor: ActorContext, permission: str, resource: ResourceScope) -> None:
+        """验证权限或地址策略，不满足时失败关闭。 actor为服务端解析的操作者，资源范围仍由服务层验证。"""
         if permission not in actor.permissions:
             raise PermissionDenied()
         if actor.actor_type == 'candidate':

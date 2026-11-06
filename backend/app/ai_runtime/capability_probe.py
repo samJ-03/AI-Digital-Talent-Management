@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：使用合成输入探测供应商协议和实际模型能力。"""
 import json
 import math
 import re
@@ -6,6 +7,7 @@ from app.ai_runtime.endpoint_policy import EndpointPolicy
 from app.ai_runtime.schemas import CapabilityTest
 
 class ProbeFailure(Exception):
+    """ProbeFailure：模型配置与受控AI执行中的协作类型。"""
     def __init__(self,code): self.code=code
 
 class CapabilityProbe:
@@ -39,6 +41,7 @@ class CapabilityProbe:
         return actual
 
     def run(self,config,secret=None) -> CapabilityTest:
+        """运行本模块定义的受控探测或固定流程。"""
         endpoint=EndpointPolicy().require(config.provider_type,config.base_url,config.model_name)
         if endpoint.family!='ollama' and not secret:
             return CapabilityTest(verified=False,capabilities={},error_code='MODEL_SECRET_MISSING')

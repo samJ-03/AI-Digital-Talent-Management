@@ -1,3 +1,4 @@
+"""模型配置与受控AI执行：执行受控生成和向量请求，持久化通过校验的生成结果。"""
 import hashlib
 import json
 import time
@@ -53,6 +54,7 @@ class ModelGateway:
             uow.commit()
 
     def generate(self,request,output_type,*,snapshot=None):
+        """请求JSON生成并返回内部模型响应或经过验证的结果。"""
         payload=request.model_dump(mode='json')
         encoded=json.dumps(payload,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
         if len(encoded)>256*1024: raise DomainError('AI_INPUT_TOO_LARGE',422,'模型输入超出限制')
@@ -93,6 +95,7 @@ class ModelGateway:
         return GenerationResult(value,run_id)
 
     def embed(self,texts: list[str],model_config_id: int) -> EmbeddingBatch:
+        """调用受限向量模型并校验完整批次及模型配置身份。"""
         if (not isinstance(texts,list) or not 1<=len(texts)<=10
             or any(not isinstance(t,str) or not t.strip() or len(t.encode('utf8'))>20000 for t in texts)):
             raise DomainError('AI_INPUT_INVALID',422,'向量输入无效')

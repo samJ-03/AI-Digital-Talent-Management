@@ -1,9 +1,11 @@
+"""平台开发工具：验证model validation的正常与失败场景；测试数据仅用于隔离环境。"""
 import json
 import pytest
 from pydantic import BaseModel, ConfigDict
 from app.ai_runtime.validation import validate_output, validate_vectors, OutputInvalid
 
 class Answer(BaseModel):
+    """Answer：平台开发工具中的输入输出数据契约。"""
     model_config = ConfigDict(extra='forbid', strict=True)
     answer: str
     citations: list[dict[str, str]]
