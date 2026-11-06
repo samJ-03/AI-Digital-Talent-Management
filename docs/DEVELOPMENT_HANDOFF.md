@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-06；状态：T09网关已实现，定向45通过及真实合成门通过；Docker引擎500阻塞最终完整回归。
+更新：2026-11-06；状态：Docker已恢复，T09完成，最终完整测试186通过；下一步T12岗位版本与自动邀请配置。
 
 ## 1. 从这里继续
 
@@ -25,12 +25,12 @@
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
 |T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
-|T09|未完成（最终回归待恢复）|网关/固定图实现；定向45通过；真实3组合成履历及1024维整批向量通过；Docker引擎500阻塞完整回归|
+|T09 模型网关与固定流程|完成|代码4641161；最终完整186通过；真实3组合成履历及1024维整批向量通过|
 |T10 邮件配置和发送适配器|完成|完整149通过；本地Celery→SMTP→Mailpit真实收件并激活配置1；企业SMTP未接入|
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
 |T12～T43|未完成|按依赖推进，生产发布需单独授权|
 
-最新完整测试：artifacts/t10-final-suite.log，149 passed。
+最新完整测试：artifacts/t09-clean-final-suite.log，186 passed in118.16s。
 真实Mailpit：artifacts/t10-live-mailpit.json，config1已验证并active，只有本地测试信。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
@@ -40,19 +40,15 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 ## 3. 当前工作与下一步
 
-T06 已提交42794f3，T07 已提交fa55a2f。T08已完成验收，见artifacts/t08-verification.md；先检查git实际日志/未提交修改，不覆盖新工作。
+已完成T01～T11（T09最后收口），T09代码提交4641161；最终完整186通过。下一步按计划T12：岗位版本、发布/暂停/关闭、卷归属与自动邀请就绪门。自动邀请默认关闭，false→true仅追加invite.scan持久事件；T23前不能把尚未实现的实际邮件处理器称已完成。没有发布/推送/上线。
 
-T11 已完成验收，见 artifacts/t11-verification.md；本地两份合成试卷ID与版本ID分别1/1、2/2。T10现已完成：完整149通过，本地Mailpit测试接入已激活；下一步T09网关实现；官方deepseek-flash已通过最小JSON检查，不再缺凭据。T12依赖T09/T10，不能跳过自动邀请就绪门直接标完成。T09网关与业务质量验收仍未完成，不能用官方连接成功替代。
+T09内部契约见docs/MODEL_GATEWAY_CONTRACT.md。AiConfigSnapshot包含config_revision；生成核对发布提示词/schema、证据引用和模型配置；只有校验结果进入AiRun。EmbeddingBatch带model_config_id/revision_no/model_name，云端model_digest=None，本地核验真实digest。T20按配置修订/维度隔离向量，私有考试评价不得进入共享画像/embedding。
 
-用户要求减少token：只读当前任务摘录和相关文件，输出摘要；保留有意义RED/GREEN和任务末完整回归，避免无变化重复检查；不用未授权的子agent。原审批曾因额度失败，用户现已明确继续，正常审批已恢复；不要绕过审批。
+用户要求减少token：只读当前任务计划段和相关文件，输出摘要；局部验证后仅任务末完整回归，失败/变化才重跑；不重复已保存的付费真实合成探测，不用未授权子agent。
 
-T08实现约定：provider_type仍是ollama/compatible_http，官方 URL+model allowlist 决定实际适配；不自动允许 api.openai-proxy.org。七个固定流程由0003_fixed_workflows迁移创建且默认关闭。提示词发布自身调用IdempotencyService，幂等键由服务构造参数从HTTP传入。模型测试只用合成输入；cloud model_digest=None，不能把model ID当作权重摘要。加密主密钥保留主项目.env，恢复加密数据库时必须一并保留。
+T08起publisher排除.env；主项目.env持有用户选定模型密钥和Fernet主密钥，不能用旧stage覆盖。Standalone default_session_factory注册全部40ORM；API/Worker重启后读取当前绑定源代码。企业SMTP未接入；本地Mailpit配置1已验证并active。
 
-凭据事实：旧DASHSCOPE_API_KEY是占位项；已根据旧TextEmbedding代码的明确引用，复用授权文件ALIYUN_API_KEY到主项目.env的TALENT_DASHSCOPE_API_KEY。真实embedding鉴权1024维成功。不要再盲选占位项或重复询问百炼地域。DeepSeek官方Key现已从新增授权根.env配置并通过合成JSON检查。
-
-从T08起 .execution/publish.py 排除.env；不要用旧缓存覆盖主项目私有环境。临时staging已去掉用户模型Key与加密主密钥，仅主项目.env持有配置；源文件从未改动。Standalone default_session_factory初始化时加载全部40ORM表，回归测试使用新进程且显式设置backend PYTHONPATH。
-
-后续边界：Word渲染后100页/完整图像解码与OCR留T13，单批50留T14。API099为鉴权附件流，FileService.attach须在领域调用方同一UoW保存关联。任务Worker固定处理器，当前已有system.verify及mail.test，其他业务处理器待逐任务注册；外部副作用必须有领域幂等/租约隔离，不能把技术诊断当招聘验收。
+T07边界：Word渲染100页/完整图像解码和OCR留T13，批量50留T14。文件授权下载基于持久化引用；attach须同一业务UoW。Worker当前仅system.verify、mail.test；其他固定处理器随任务注册。
 
 ## 4. 运行环境和命令
 
@@ -94,18 +90,14 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 Worker现在支持受控handler.prepare(lease)→原子finalize；邮件测试在SMTP前持久化processing标记，崩溃/超时后unknown终态，不自动重发。TerminalJobFailure可与领域状态同事务提交。服务端停用/切换SMTP只处理尚未发送pending通知为failed，mail_config_id不改。SMTP延迟connect要设置经过验证的_host用于Python3.11 SNI，证书检查始终启用。0004仅放宽数据库允许none，服务策略只准本地Mailpit。API094最小脱敏任务报告已提前提供，T28再补完整读取层。
 
 
-### 最新官方模型续接
+### 2026-11-06 T09验收与Docker恢复
 
-DEEPSEEK_API_KEY来源D:/wolin_learn-master/.env已明确授权且成功；主项目.env变量TALENT_DEEPSEEK_API_KEY。官方config3（logical_key deepseek-flash）能力verified，JSON成功；不要再询问/扫描其他Key，不用第三方代理。只做了最小协议检查，T09仍未完成。测试证据deepseek-official-capability.json、deepseek-config-regression.log（10通过），最近完整主线测试仍为149通过。下一步按 .execution/T09-brief.md（暂在staging，已复制到主仓库）实现gateway、graphs、校验和真实业务样本。
+用户明确允许重启Docker Desktop，已用官方desktop restart完成；本项目全部基础服务健康，API live200，7个固定流程仍关闭，真实合成AiRun1/2/3保持succeeded。证据artifacts/t09-recovery-check.json。重启会影响所有项目，本轮授权已执行，不将它当作以后无限重启授权。
 
-### 2026-11-06 T09最新断点（优先读）
+T09有效RED：畸形协议JSON2失败3通过，修复错误归类。此前定向45通过。最终版本（含新增重试边界2项、task/来源键限制）完整186 passed in118.16s，artifacts/t09-clean-final-suite.log。第一次恢复回归185通过1失败：最后管理员保护受中断残留测试账号影响，后段schema迁移往返清空隔离库后单项1通过；再完整186全绿。没有放宽保护，也未修改开发库。
 
-实现gateway、严格结构化/证据/整批向量校验、代码注册LangGraph、受控DeepSeek/Ollama适配器及AiRuntime入口。内部契约见docs/MODEL_GATEWAY_CONTRACT.md。云端digest可空，EmbeddingBatch带model_config_id/revision_no/model_name；AiConfigSnapshot新增config_revision。生成写AiRun；embedding无虚构prompt，以返回来源配置供T20记录。
+真实门artifacts/t09-live-gateway.json ready=true：官方DeepSeek config3三个合成样本（Python3年、Java8年、夹带注入行政履历unknown）与引用通过；百炼config2三条整批1024维通过；云端未提供权重摘要保留None。合成调用后流程已恢复。付费CLI python scripts/compose.py exec -T api python -m app.ai_runtime.verify_gateway，故意不放入普通pytest。恢复期间未重复调用模型。
 
-有效RED：协议畸形JSON测试2失败3通过，修复为MODEL_OUTPUT_INVALID；首次缺模块RED与夹具identity缺导入另有记录，夹具错误不算业务RED。修复后定向45通过（artifacts/t09-targeted-final.log）。之后新增2项重试边界测试、限定生成task类型及来源引用键、整理校验异常和CLI恢复；这几项最终版本仅语法22文件检查通过，尚未在容器执行。
+验收详情artifacts/t09-verification.md，内部契约docs/MODEL_GATEWAY_CONTRACT.md，详细计划T09已全部勾选。仅T09基础能力完成，招聘业务及业务页面仍待后续任务，不称整套系统跑通。下一步T12。
 
-显式真实调用artifacts/t09-live-gateway.json ready=true：模型config3、AiRun1/2/3，Python3年/Java8年/夹带注入的行政履历unknown均正确；config2三条embedding全部1024维。调用后恢复match/embedding原配置与关闭状态。没有把真实验收CLI加入常规pytest，避免每次回归付费；计划相应命令已同步。
-
-完整测试启动artifacts/t09-final-suite.log，创建本项目一次性容器ai-talent-dev-api-run-526232beca41，到前15项后停滞；docker ps返回LinuxEngine API500、18080健康端点超时。宿主TCP仍可连接但不代表服务健康。没有重启Docker或其他项目容器。已异步询问用户是否允许重启整个Docker（影响所有项目），尚未收到许可；不要把等待当授权。
-
-恢复时先读最终日志与实际docker状态，先判断这次回归是否仍在跑，不能启动重复full suite。若需清理仅处理上述本项目一次性测试容器，勿重启/删除其他项目服务。恢复后跑最终版本定向与完整回归，再检查工作流恢复与模型契约，满足后才能标T09完成并进入T12。最近已完成完整基线仍为149 passed。当前T09未完成，不用局部成功冒充完整业务通过。
+若之后强制中断pytest，先确认旧测试容器不再运行，再检查隔离talent_test残留；测试中断可使管理员数量等全局断言受污染。迁移/清理只准严格验证后的talent_test，禁止动talent_dev或用户已有库；不能通过删除业务保护来使测试通过。
