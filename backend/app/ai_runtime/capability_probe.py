@@ -23,7 +23,8 @@ class CapabilityProbe:
             for chunk in response.iter_bytes():
                 data.extend(chunk)
                 if len(data)>512*1024: raise ProbeFailure('MODEL_RESPONSE_TOO_LARGE')
-            result=json.loads(data)
+            try: result=json.loads(data)
+            except (ValueError,RecursionError): raise ProbeFailure('MODEL_OUTPUT_INVALID') from None
             if not isinstance(result,dict): raise ProbeFailure('MODEL_OUTPUT_INVALID')
             return result
 

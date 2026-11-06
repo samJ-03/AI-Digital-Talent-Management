@@ -12,6 +12,12 @@ class AiRuntime:
         self.uow_factory=uow_factory
         self.cipher=SecretCipher(settings.encryption_key.get_secret_value()) if settings.encryption_key else None
         self.probe=CapabilityProbe()
+    def gateway(self):
+        from app.ai_runtime.gateway import ModelGateway
+        return ModelGateway(self.uow_factory,self.cipher)
+    def graphs(self,output_types):
+        from app.ai_runtime.graphs import FixedGraphRunner
+        return FixedGraphRunner(self.gateway(),output_types)
     def models(self): return ModelConfigService(self.uow_factory,self.cipher,self.probe)
     def prompts(self,key=None): return PromptService(self.uow_factory,key)
     def workflows(self): return WorkflowConfigService(self.uow_factory)

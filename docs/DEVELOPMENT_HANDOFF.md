@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-05；状态：官方deepseek-flash接通；继续T09网关实现与业务质量验证。
+更新：2026-11-06；状态：T09网关已实现，定向45通过及真实合成门通过；Docker引擎500阻塞最终完整回归。
 
 ## 1. 从这里继续
 
@@ -25,7 +25,7 @@
 |T06 持久任务与恢复|完成|完整测试93通过；真实 DB/Redis/Celery 交付与单调度器租约验证通过|
 |T07 私有文件与授权下载|完成|完整测试107通过；真实代理二进制下载、MinIO私有桶与清理验证通过|
 |T08 模型配置、提示词、固定流程|完成|完整测试126通过；百炼 text-embedding-v3 真实鉴权/1024维通过；真实管理员入口检查通过|
-|T09|未完成|官方Key已配置，deepseek-flash最小JSON通过；网关/固定图/业务质量验收仍待实现|
+|T09|未完成（最终回归待恢复）|网关/固定图实现；定向45通过；真实3组合成履历及1024维整批向量通过；Docker引擎500阻塞完整回归|
 |T10 邮件配置和发送适配器|完成|完整149通过；本地Celery→SMTP→Mailpit真实收件并激活配置1；企业SMTP未接入|
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
 |T12～T43|未完成|按依赖推进，生产发布需单独授权|
@@ -80,11 +80,9 @@ Compose 必须用 python scripts/compose.py（显式 --env-file），不要直�
 
 ## 6. 凭据、模型与授权状态
 
-本地 MySQL/Redis/MinIO/.env 凭据由本项目随机生成；没有使用用户已有数据库或企业服务密码。后台管理员与两名部门 HR 的密码也是随机生成，保存在 .execution/local-accounts.json。该文件和 .env 均在 Git 忽略范围内；不要读取后显示、写进文档或 Git；bootstrap 不重置现有账号。
+本项目生成的数据库/对象存储/后台账号凭据仅在ignored .env与.execution/local-accounts.json，不打印、不提交。DeepSeek官方Key已按用户授权从D:/wolin_learn-master/.env选择DEEPSEEK_API_KEY，主项目TALENT_DEEPSEEK_API_KEY，官方config3真实JSON及T09合成样本通过。百炼按授权rag_examples代码选取ALIYUN_API_KEY（DASHSCOPE_API_KEY是占位项），主项目TALENT_DASHSCOPE_API_KEY，config2真实1024维通过。加密主密钥也仅在主项目.env。publisher排除.env，禁止用stage覆盖。源文件未改动；第三方代理未使用，不再重复询问Key/渠道/地域。
 
-最新授权：用户指定 DeepSeek deepseek-flash，百炼 text-embedding-v3（原文 test-embedding-v3）与可选 qwen3-rerank，并授权从 D:/Wolin_Project/Yue-Education/.env 选择所需凭据。只读核对发现百炼 Key 存在；无独立 DeepSeek 官方 Key，旧 OPENAI_API_KEY 配套第三方 api.openai-proxy.org。已询问官方直连还是该代理，等待答复。已补查 D:/wolin_learn-master/rag_examples：发现百炼北京旧共享域名 https://dashscope.aliyuncs.com/compatible-mode/v1，地区/endpoint 不再需用户补充，但实际认证/模型调用尚未验证；该目录也无 DeepSeek 官方 Key。后续 T08 已按代码用途选择 ALIYUN_API_KEY（DASHSCOPE_API_KEY 实为占位项）复制到主项目私有环境并通过合成文本 embedding 真实检查；未调用 DeepSeek、未发送真实招聘邮件。详见 docs/MODEL_AND_DATABASE_DECISION.md。数据库按用户“改动大则保持原栈”决定保留 MySQL+Milvus；PostgreSQL 端口与协议已确认响应，但未认证或修改。
-
-到 T08/T09 接入前，先取得待答复的 DeepSeek 官方凭据或明确代理渠道选择；百炼按已查到的北京共享域名进行合成输入连通检查，不再重复询问地域。云端路线与拟用模型已经由用户指定，不要重复询问同一选择；合成数据做最小连通验证，费用/额度问题出现时如实反馈。若选 OpenAI，先使用 openai-platform-api-key 技能的凭据流程，再配置用户明确指定的本地目的地；不得扫描并复用现有 Key。其他供应商也只使用用户明确指定的项目凭据。不要让用户将密码/完整 API Key 发到普通聊天；用本地 .env/秘密文件或受支持的安全配置流程。企业 SMTP、生产数据库/对象存储、部署机器与 HTTPS 域名配置在实际接入时单独确认。
+保留MySQL+Milvus；未认证/修改用户PostgreSQL。企业SMTP、生产服务、部署仍待对应阶段确认。仅合成输入发往已授权官方模型，未发送真实候选人资料或企业招聘邮件。
 
 ## 7. 已确认且不能擅自改的核心业务
 
@@ -99,3 +97,15 @@ Worker现在支持受控handler.prepare(lease)→原子finalize；邮件测试�
 ### 最新官方模型续接
 
 DEEPSEEK_API_KEY来源D:/wolin_learn-master/.env已明确授权且成功；主项目.env变量TALENT_DEEPSEEK_API_KEY。官方config3（logical_key deepseek-flash）能力verified，JSON成功；不要再询问/扫描其他Key，不用第三方代理。只做了最小协议检查，T09仍未完成。测试证据deepseek-official-capability.json、deepseek-config-regression.log（10通过），最近完整主线测试仍为149通过。下一步按 .execution/T09-brief.md（暂在staging，已复制到主仓库）实现gateway、graphs、校验和真实业务样本。
+
+### 2026-11-06 T09最新断点（优先读）
+
+实现gateway、严格结构化/证据/整批向量校验、代码注册LangGraph、受控DeepSeek/Ollama适配器及AiRuntime入口。内部契约见docs/MODEL_GATEWAY_CONTRACT.md。云端digest可空，EmbeddingBatch带model_config_id/revision_no/model_name；AiConfigSnapshot新增config_revision。生成写AiRun；embedding无虚构prompt，以返回来源配置供T20记录。
+
+有效RED：协议畸形JSON测试2失败3通过，修复为MODEL_OUTPUT_INVALID；首次缺模块RED与夹具identity缺导入另有记录，夹具错误不算业务RED。修复后定向45通过（artifacts/t09-targeted-final.log）。之后新增2项重试边界测试、限定生成task类型及来源引用键、整理校验异常和CLI恢复；这几项最终版本仅语法22文件检查通过，尚未在容器执行。
+
+显式真实调用artifacts/t09-live-gateway.json ready=true：模型config3、AiRun1/2/3，Python3年/Java8年/夹带注入的行政履历unknown均正确；config2三条embedding全部1024维。调用后恢复match/embedding原配置与关闭状态。没有把真实验收CLI加入常规pytest，避免每次回归付费；计划相应命令已同步。
+
+完整测试启动artifacts/t09-final-suite.log，创建本项目一次性容器ai-talent-dev-api-run-526232beca41，到前15项后停滞；docker ps返回LinuxEngine API500、18080健康端点超时。宿主TCP仍可连接但不代表服务健康。没有重启Docker或其他项目容器。已异步询问用户是否允许重启整个Docker（影响所有项目），尚未收到许可；不要把等待当授权。
+
+恢复时先读最终日志与实际docker状态，先判断这次回归是否仍在跑，不能启动重复full suite。若需清理仅处理上述本项目一次性测试容器，勿重启/删除其他项目服务。恢复后跑最终版本定向与完整回归，再检查工作流恢复与模型契约，满足后才能标T09完成并进入T12。最近已完成完整基线仍为149 passed。当前T09未完成，不用局部成功冒充完整业务通过。
