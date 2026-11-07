@@ -932,7 +932,7 @@ def test_missing_email_remains_unknown(extractor, document_without_email, extrac
     assert "@" not in str(result.contacts.email or "")
 ~~~
 
-- [ ] **T13.1.1** test_text_pdf_no_ocr_needed：文本PDF保留段落。
+- [x] **T13.1.1** test_text_pdf_no_ocr_needed：文本PDF保留段落。
 - [ ] **T13.1.2** test_scan_routes_to_ocr：扫描件真实OCR。
 - [ ] **T13.1.3** test_doc_conversion_timeout：旧DOC转换超时可控终止且临时文件清理。
 - [ ] **T13.1.4** test_missing_email_remains_unknown：不编造邮箱。
@@ -3052,3 +3052,8 @@ T08 实际验证补充：已按旧SDK用途选取授权文件的 ALIYUN_API_KEY�
 ## 核心交付优先级调整（2026-11-07）
 
 用户已确认先以T30最小纵向招聘闭环为可用交付目标。T12已通过19项定向及209项完整测试，本地合成岗位9项验证通过；实际邀考消费者仍留T22/T23。优先T13～T30并穿插最小页面，T31～T37扩展后补；高级语义检索和复杂扫描件优化后补时，相关原任务不得提前勾选，质量门及依赖接口仍须保留。详情见[核心交付顺序](../CORE_DELIVERY_PRIORITY.md)。本轮无生产部署。
+
+
+### T13核心格式子任务进度（2026-11-08）
+
+文本PDF与普通文字DOCX内部解析已实现，32项定向测试通过；真实段落/表格/页眉来源和进程资源保护已验证。支持范围见[解析说明](../CORE_PARSER_SUPPORT.md)。原T13整体仍未完成：ResumeExtractor、OCR、旧DOC转换、物理Word分页及五格式整体验收继续待做。这里只勾选已验证的T13.1.1，其他步骤不因子任务交付提前勾选。

@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-07；状态：T01～T12完成；完整测试209通过；下一步T13简历解析，优先交付T30核心招聘闭环。
+更新：2026-11-08；状态：T01～T12完成；完整测试241通过；T13文本格式解析子任务完成，下一步字段提取与导入，优先交付T30核心招聘闭环。
 
 ## 1. 从这里继续
 
@@ -31,7 +31,7 @@
 |T12 岗位版本与自动邀请配置|完成|19项定向、209项完整回归；本地合成岗位9项检查通过|
 |T13～T43|未完成|优先T30核心闭环，扩展功能后补；生产发布需单独授权|
 
-最新完整测试：artifacts/t12-final-suite.log，209 passed in142.30s；T12定向19通过。本轮前端未变，未重复构建；之前前端lint/typecheck/build通过。
+最新完整测试：artifacts/t13-core-final-suite.log，241 passed in175.27s；T13文本格式定向32通过，T12定向19通过。本轮前端未变，未重复构建；之前前端lint/typecheck/build通过。
 真实Mailpit：artifacts/t10-live-mailpit.json，config1已验证并active，只有本地测试信。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
@@ -119,3 +119,10 @@ T09有效RED：畸形协议JSON2失败3通过，修复错误归类。此前定�
 七项岗位写API已实施，岗位版本发布不可变、状态变更关闭开关，自动邀请须具备同部门发布卷、有效模型流程与邮件配置。修复MySQL REPEATABLE READ下配置停用旧快照误通过以及并发草稿编号冲突；锁定依赖强引用保留至事务结束。19项定向及209项完整测试通过，独立只读审阅无阻塞发现。artifacts/t12-live-local.json为合成岗位1/版本1的9项领域服务检查，最终closed/off，无扫描事件、外部邮件或付费模型调用。公开摘要docs/T12_VERIFICATION.md；详细本地证据artifacts/t12-verification.md。
 
 保留原计划，T31～T37扩展后补。企业SMTP和复杂扫描件支持按实际验收说明，人工补录不能替代原T13全格式完成。工作区原有OpenSpec配置/技能改动保留，不混入T12提交。新T12变更目录独立跟踪本任务。提交/远端状态查看Git及最新交付收据，不从文档猜测SHA。
+
+
+### T13文本格式子任务（2026-11-08）
+
+文本PDF与普通文字DOCX适配器已实现，源码backend/app/ingestion/{document_types,parsers,parse_worker}.py。32项定向和241项完整测试通过；无网络/付费模型调用。独立审阅发现并修复Word内容控件、修订等包装文字静默丢失；不支持的可见文字包装明确失败。子进程环境不传递应用凭据，父进程超时回收，Linux限制地址空间/CPU。
+
+支持说明docs/CORE_PARSER_SUPPORT.md，验收docs/T13_CORE_VERIFICATION.md，本地日志artifacts/t13-core-*。原T13保持未完成，仅T13.1.1已验证勾选。下一步ResumeExtractor通过已有网关实现结构化字段与证据，缺失邮箱保持unknown，再接T14/T15；OCR、旧DOC、复杂Word、Word物理分页仍待后续。当前没有公开导入API/招聘页面，不得把解析测试说成业务闭环验收。T12上传收据仍保留；本子任务提交与上传查看最新Git和artifacts/t13-core-upload-receipt.json。
