@@ -118,7 +118,7 @@ docs/                     测试交付、运行、发布回退手册
 | - [x] T09 | M1 | 模型网关和结构化输出验证 | T08 |
 | - [x] T10 | M1 | 邮件配置测试、激活与安全发送适配器 | T05、T06、T08 |
 | - [x] T11 | M2 | 题库与不可变岗位试卷 | T05、T04 |
-| - [ ] T12 | M2 | 岗位版本与自动邀请配置 | T11、T09、T10 |
+| - [x] T12 | M2 | 岗位版本与自动邀请配置 | T11、T09、T10 |
 | - [ ] T13 | M2 | PDF、Word、扫描件与图片解析适配器 | T07、T09 |
 | - [ ] T14 | M2 | 批量导入、任务排队和失败重试 | T06、T07、T12 |
 | - [ ] T15 | M2 | 人才建档、邮箱门槛与简历修订 | T13、T14 |
@@ -862,7 +862,7 @@ JobService.set_automation(self, actor: ActorContext, job_id: int, enabled: bool,
 
 **类型与规则：** JobCreate={title,department_id,headcount}; JobPatch={title?,headcount?,owner_hr_id?}; JobVersionDraft见05；AutomationView={job,readiness:{ready,blocking_reasons}}。仅open且卷/邮件/AI就绪可开启，默认false。
 
-- [ ] **T12.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T12.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_default_automation_off(job_service, hr_actor, valid_job_command):
@@ -871,23 +871,23 @@ def test_default_automation_off(job_service, hr_actor, valid_job_command):
     assert job.status == "draft"
 ~~~
 
-- [ ] **T12.1.1** test_default_automation_off：建岗不发信。
-- [ ] **T12.1.2** test_required_before_enable：缺卷/模型/邮件返回409及原因。
-- [ ] **T12.1.3** test_weights_sum_100：50/35/15合法，和非100拒绝。
-- [ ] **T12.1.4** test_published_job_version_immutable：修改发布内容必须新版本。
-- [ ] **T12.1.5** test_current_version_owner_mismatch：其他岗位版本不可设为current。
+- [x] **T12.1.1** test_default_automation_off：建岗不发信。
+- [x] **T12.1.2** test_required_before_enable：缺卷/模型/邮件返回409及原因。
+- [x] **T12.1.3** test_weights_sum_100：50/35/15合法，和非100拒绝。
+- [x] **T12.1.4** test_published_job_version_immutable：修改发布内容必须新版本。
+- [x] **T12.1.5** test_current_version_owner_mismatch：其他岗位版本不可设为current。
 
-- [ ] **T12.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T12.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T12.4 验证GREEN及异常。** 执行：
+- [x] **T12.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T12.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T12.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_job_versions.py -q
 ~~~
 
-预期：测试全部PASS、构建成功、退出0。完成条件：岗位版本与试卷版本归属/权限验证正确；暂停/关闭只阻止后续动作，不修改历史。；开关false→true时追加invite.scan事件，扫描尚未有考次的首次auto_allowed匹配记录；manual_only、revoked和历史已邀考记录不自动复活。
+预期：测试全部PASS、构建成功、退出0。完成条件：岗位版本与试卷版本归属/权限验证正确；暂停/关闭只阻止后续动作，不修改历史。；开关false→true时追加invite.scan事件。T12只验收生产事件；T22/T23负责消费时扫描尚未有考次的首次auto_allowed匹配记录，不复活manual_only、revoked和历史已邀考记录。
 
-- [ ] **T12.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t12-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T12.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t12-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
 - [ ] **T12.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
@@ -3047,3 +3047,8 @@ T08 实际验证补充：已按旧SDK用途选取授权文件的 ALIYUN_API_KEY�
 ## 仓库与实施规范补充（2026-11-06）
 
 用户要求上传GitHub：samJ-03/AI-Digital-Talent-Management。代码补齐模块/公开类函数说明、前端JSDoc及40表478字段SQL COMMENT，追加0005/0006注释迁移，不能修改已应用历史迁移。新增无秘密.env_example（兼容.env.example）及安全init_env脚本、README、配置与数据库字典、docs/specs仓库内规格副本。最终完整190通过，前端lint/typecheck/build通过；不重复付费模型调用。后续新代码遵循docs/CONTRIBUTING.md，字段变更同步数据库字典；.env和本地执行证据不上传。功能进度仍T01～T11完成，下一步T12。
+
+
+## 核心交付优先级调整（2026-11-07）
+
+用户已确认先以T30最小纵向招聘闭环为可用交付目标。T12已通过19项定向及209项完整测试，本地合成岗位9项验证通过；实际邀考消费者仍留T22/T23。优先T13～T30并穿插最小页面，T31～T37扩展后补；高级语义检索和复杂扫描件优化后补时，相关原任务不得提前勾选，质量门及依赖接口仍须保留。详情见[核心交付顺序](../CORE_DELIVERY_PRIORITY.md)。本轮无生产部署。

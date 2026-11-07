@@ -1,6 +1,6 @@
 # 开发记录与断点续接
 
-更新：2026-11-06；状态：Docker已恢复，T09完成，上传整理完成，最终完整测试190通过；下一步T12岗位版本与自动邀请配置。
+更新：2026-11-07；状态：T01～T12完成；完整测试209通过；下一步T13简历解析，优先交付T30核心招聘闭环。
 
 ## 1. 从这里继续
 
@@ -28,9 +28,10 @@
 |T09 模型网关与固定流程|完成|代码4641161；最终完整186通过；真实3组合成履历及1024维整批向量通过|
 |T10 邮件配置和发送适配器|完成|完整149通过；本地Celery→SMTP→Mailpit真实收件并激活配置1；企业SMTP未接入|
 |T11 题库与不可变试卷|完成|完整137通过；开发库两个部门各发布3题型/100分试卷并验证隔离|
-|T12～T43|未完成|按依赖推进，生产发布需单独授权|
+|T12 岗位版本与自动邀请配置|完成|19项定向、209项完整回归；本地合成岗位9项检查通过|
+|T13～T43|未完成|优先T30核心闭环，扩展功能后补；生产发布需单独授权|
 
-最新完整测试：artifacts/github-upload-final-suite.log，190 passed in155.06s；前端lint/typecheck/build通过。T09原始验收为186通过。
+最新完整测试：artifacts/t12-final-suite.log，209 passed in142.30s；T12定向19通过。本轮前端未变，未重复构建；之前前端lint/typecheck/build通过。
 真实Mailpit：artifacts/t10-live-mailpit.json，config1已验证并active，只有本地测试信。
 真实百炼：artifacts/t08-live-dashscope.json，text-embedding-v3/1024维，只有合成文本。
 真实队列：artifacts/t06-live-queue.json，queued/pending→succeeded/sent。
@@ -40,7 +41,7 @@ artifacts 和 .execution 被 Git 忽略，但已经保存在本机项目目录�
 
 ## 3. 当前工作与下一步
 
-已完成T01～T11（T09最后收口），T09代码提交4641161；最终完整186通过。下一步按计划T12：岗位版本、发布/暂停/关闭、卷归属与自动邀请就绪门。自动邀请默认关闭，false→true仅追加invite.scan持久事件；T23前不能把尚未实现的实际邮件处理器称已完成。用户现已明确授权上传GitHub；没有生产部署授权。
+已完成T01～T12。下一步T13解析，随后依原任务实现导入、画像、筛选、考试及最小页面，先验收T30。核心优先级见docs/CORE_DELIVERY_PRIORITY.md；岗位API细节见docs/JOB_VERSIONS_CONTRACT.md。T12只原子生产invite.scan，T22/T23消费者未完成；不能称为已自动发信。用户已授权代码上传，未授权生产部署。
 
 T09内部契约见docs/MODEL_GATEWAY_CONTRACT.md。AiConfigSnapshot包含config_revision；生成核对发布提示词/schema、证据引用和模型配置；只有校验结果进入AiRun。EmbeddingBatch带model_config_id/revision_no/model_name，云端model_digest=None，本地核验真实digest。T20按配置修订/维度隔离向量，私有考试评价不得进入共享画像/embedding。
 
@@ -111,3 +112,10 @@ T09有效RED：畸形协议JSON2失败3通过，修复错误归类。此前定�
 源码文档覆盖148个Python模块、176个类、208个公开函数/方法，前端边界有JSDoc；原135个修改的Python文件以AST比较确认可执行语句不变（排除docstring和mapped_column.comment）。40表478字段都具备中文SQL COMMENT和模型类说明。追加0005_schema_comments及0006_comment_semantics，不改原迁移；字段定义和数据保真测试通过，开发库迁移已应用，alembic check无漂移。docs/DATABASE.md为ORM导出字典，docs/specs包含8份评审基线及计划仓库副本，跨机器续接见AGENTS.md。
 
 验证：github-comments-red.log明确字段comment缺失失败；真实MySQL注释/迁移保真2通过；github-upload-final-suite.log为最终190通过，前端lint/typecheck/build通过。上传前检查工作文件与全部可达Git历史，未发现配置的真实秘密或私有文件路径入历史；.env、.execution、artifacts均忽略，不上传简历/答卷/账号/密钥/数据库导出。没有重复付费模型探测，没有对外招聘邮件。
+
+
+### T12检查点与核心优先（2026-11-07）
+
+七项岗位写API已实施，岗位版本发布不可变、状态变更关闭开关，自动邀请须具备同部门发布卷、有效模型流程与邮件配置。修复MySQL REPEATABLE READ下配置停用旧快照误通过以及并发草稿编号冲突；锁定依赖强引用保留至事务结束。19项定向及209项完整测试通过，独立只读审阅无阻塞发现。artifacts/t12-live-local.json为合成岗位1/版本1的9项领域服务检查，最终closed/off，无扫描事件、外部邮件或付费模型调用。公开摘要docs/T12_VERIFICATION.md；详细本地证据artifacts/t12-verification.md。
+
+保留原计划，T31～T37扩展后补。企业SMTP和复杂扫描件支持按实际验收说明，人工补录不能替代原T13全格式完成。工作区原有OpenSpec配置/技能改动保留，不混入T12提交。新T12变更目录独立跟踪本任务。提交/远端状态查看Git及最新交付收据，不从文档猜测SHA。

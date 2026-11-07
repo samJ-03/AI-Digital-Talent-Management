@@ -17,6 +17,7 @@ from app.core.readiness import InfrastructureProbe
 from app.identity.router import IdentityRuntime, identity_router
 from app.ai_runtime.router import AiRuntime,router as ai_router
 from app.assessment.paper_router import router as paper_router
+from app.jobs.router import router as jobs_router
 from app.notifications.router import MailRuntime,router as mail_router
 from app.core.request_context import request_id_context
 from app.runtime.router import router as runtime_router
@@ -50,6 +51,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(files_router)
     app.include_router(ai_router)
     app.include_router(paper_router)
+    app.include_router(jobs_router)
     app.include_router(mail_router)
 
     @app.middleware('http')
