@@ -888,7 +888,7 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_jo
 预期：测试全部PASS、构建成功、退出0。完成条件：岗位版本与试卷版本归属/权限验证正确；暂停/关闭只阻止后续动作，不修改历史。；开关false→true时追加invite.scan事件。T12只验收生产事件；T22/T23负责消费时扫描尚未有考次的首次auto_allowed匹配记录，不复活manual_only、revoked和历史已邀考记录。
 
 - [x] **T12.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t12-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T12.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T12.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/jobs/service.py' 'backend/app/jobs/router.py' 'backend/app/jobs/schemas.py' 'backend/tests/integration/test_job_versions.py'

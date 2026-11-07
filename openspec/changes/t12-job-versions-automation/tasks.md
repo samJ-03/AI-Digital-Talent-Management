@@ -28,7 +28,7 @@
 ## 3. Recovery and delivery（对应T12.5～T12.6）
 
 - [x] 3.1 同步T12勾选、接口细化、README与续接记录，OpenSpec validate --strict通过；不混入原OpenSpec工具配置的未提交内容。
-- [ ] 3.2 仅提交T12及相应文档，上传GitHub并核对远端SHA；当前未完成消费者/后续T13等如实记录。
+- [x] 3.2 仅提交T12及相应文档，上传GitHub并核对远端SHA；当前未完成消费者/后续T13等如实记录。
 
 ## Workflow follow-up
 
