@@ -120,7 +120,7 @@ docs/                     测试交付、运行、发布回退手册
 | - [x] T11 | M2 | 题库与不可变岗位试卷 | T05、T04 |
 | - [x] T12 | M2 | 岗位版本与自动邀请配置 | T11、T09、T10 |
 | - [ ] T13 | M2 | PDF、Word、扫描件与图片解析适配器 | T07、T09 |
-| - [ ] T14 | M2 | 批量导入、任务排队和失败重试 | T06、T07、T12 |
+| - [x] T14 | M2 | 批量导入、任务排队和失败重试 | T06、T07、T12 |
 | - [ ] T15 | M2 | 人才建档、邮箱门槛与简历修订 | T13、T14 |
 | - [ ] T16 | M2 | 重复确认及历史关系合并 | T15 |
 | - [ ] T17 | M2 | 共享人才画像与岗位授权视图 | T09、T15 |
@@ -935,7 +935,7 @@ def test_missing_email_remains_unknown(extractor, document_without_email, extrac
 - [x] **T13.1.1** test_text_pdf_no_ocr_needed：文本PDF保留段落。
 - [ ] **T13.1.2** test_scan_routes_to_ocr：扫描件真实OCR。
 - [ ] **T13.1.3** test_doc_conversion_timeout：旧DOC转换超时可控终止且临时文件清理。
-- [ ] **T13.1.4** test_missing_email_remains_unknown：不编造邮箱。
+- [x] **T13.1.4** test_missing_email_remains_unknown：不编造邮箱。
 - [ ] **T13.1.5** test_mixed_language_sources：中文英文来源可定位。
 
 - [ ] **T13.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
@@ -980,7 +980,7 @@ ImportService.list_batches(self, actor: ActorContext, query: PageQuery) -> Page[
 
 **类型与规则：** ImportBatchView/BatchDetail字段按05；JobSpec input_refs仅file/import_item/job ID。批次独立事务建队列，每文件异常独立可重试，任务类型resume.parse由T15注册处理。
 
-- [ ] **T14.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T14.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_idempotent_batch(import_service, hr_actor, same_uploads, job_id):
@@ -989,14 +989,14 @@ def test_idempotent_batch(import_service, hr_actor, same_uploads, job_id):
     assert first.id == second.id
 ~~~
 
-- [ ] **T14.1.1** test_partial_failure_keeps_valid_items：混合批次部分成功。
-- [ ] **T14.1.2** test_idempotent_batch：重复key返回同批次。
-- [ ] **T14.1.3** test_no_job_import_no_invite：人才库导入不创建邀考。
-- [ ] **T14.1.4** test_file_limit_enforced：50份/20MiB/100页可配置且有错误。
+- [x] **T14.1.1** test_partial_failure_keeps_valid_items：混合批次部分成功。
+- [x] **T14.1.2** test_idempotent_batch：重复key返回同批次。
+- [x] **T14.1.3** test_no_job_import_no_invite：人才库导入不创建邀考。
+- [x] **T14.1.4** test_file_limit_enforced：50份/20MiB/100页可配置且有错误。
 
-- [ ] **T14.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T14.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T14.4 验证GREEN及异常。** 执行：
+- [x] **T14.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T14.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T14.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_import_batches.py -q
@@ -1004,8 +1004,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_im
 
 预期：测试全部PASS、构建成功、退出0。完成条件：上传→文件存储→任务受理→轮询可查；T15之前实际解析处理尚未完成，不提前标闭环成功。
 
-- [ ] **T14.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t14-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T14.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T14.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t14-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T14.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/ingestion/service.py' 'backend/app/ingestion/router.py' 'backend/app/ingestion/schemas.py' 'backend/tests/integration/test_import_batches.py'
@@ -3057,3 +3057,10 @@ T08 实际验证补充：已按旧SDK用途选取授权文件的 ALIYUN_API_KEY�
 ### T13核心格式子任务进度（2026-11-08）
 
 文本PDF与普通文字DOCX内部解析已实现，32项定向测试通过；真实段落/表格/页眉来源和进程资源保护已验证。支持范围见[解析说明](../CORE_PARSER_SUPPORT.md)。原T13整体仍未完成：ResumeExtractor、OCR、旧DOC转换、物理Word分页及五格式整体验收继续待做。这里只勾选已验证的T13.1.1，其他步骤不因子任务交付提前勾选。
+
+2026-11-09：ResumeExtractor子任务18项定向/259项完整测试通过；缺失邮箱保持未知已验证，T13整体仍未完成。下一步T14/T15核心导入建档。
+
+
+### T14实施核验（2026-11-09）
+
+21项定向、280项完整测试与本地合成批次7项受理检查通过；0007允许仅failed条目缺少文件引用并保护无损降级。当前只到受理/轮询/重试，T15处理器与人才建档未完成，不声称缺邮箱已形成可用人才档案。下一步T15，原T13全格式仍待后补。
