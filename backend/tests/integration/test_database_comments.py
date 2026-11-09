@@ -29,12 +29,17 @@ def test_comment_migration_preserves_definition_and_data(db_engine):
         inspector=inspect(db_engine)
         return {t:{c['name']:(str(c['type']),c['nullable'],c.get('default'),c.get('autoincrement')) for c in inspector.get_columns(t)} for t in register_models().tables}
     try:
+        # Only 0005/0006 are comment migrations; later structural changes
+        # have their own roundtrip contracts and must not enter this snapshot.
+        command.downgrade(cfg,'0006_comment_semantics')
         original=definitions()
         command.downgrade(cfg,'0004_local_mailpit_tls')
         assert definitions()==original
-        command.upgrade(cfg,'head')
+        command.upgrade(cfg,'0006_comment_semantics')
         assert definitions()==original
         with db_engine.connect() as conn:
             assert conn.execute(text('SELECT name FROM departments WHERE id=:id'),{'id':row_id}).scalar_one()==marker
     finally:
-        with db_engine.begin() as conn: conn.execute(text('DELETE FROM departments WHERE id=:id'),{'id':row_id})
+        try: command.upgrade(cfg,'head')
+        finally:
+            with db_engine.begin() as conn: conn.execute(text('DELETE FROM departments WHERE id=:id'),{'id':row_id})

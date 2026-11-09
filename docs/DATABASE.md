@@ -295,7 +295,7 @@
 | 字段 | MySQL类型 | 可空 | 默认值 | 说明 |
 |---|---|---|---|---|
 | batch_id | BIGINT UNSIGNED | 否 | — | 所属简历导入批次ID |
-| file_id | BIGINT UNSIGNED | 否 | — | 私有原始文件ID |
+| file_id | BIGINT UNSIGNED | 是 | — | 私有原始文件ID；仅上传前置失败时可空且状态必须failed |
 | resume_version_id | BIGINT UNSIGNED | 是 | — | 冻结的简历修订ID |
 | status | VARCHAR(32) | 否 | uploaded | 业务生命周期状态；允许值：uploaded,queued,parsing,parsed,failed |
 | error_code | VARCHAR(64) | 是 | — | 允许记录的稳定错误码 |
@@ -308,7 +308,7 @@
 
 外键：batch_id → import_batches.id (ON DELETE RESTRICT)；file_id → stored_files.id (ON DELETE RESTRICT)；resume_version_id → resume_versions.id (ON DELETE RESTRICT)。
 
-约束与索引：CHECK status IN ('uploaded','queued','parsing','parsed','failed')；INDEX ix_import_items_batch_id(batch_id)；INDEX ix_import_items_batch_id_status(batch_id,status)；INDEX ix_import_items_file_id(file_id)；INDEX ix_import_items_resume_version_id(resume_version_id)；UNIQUE(batch_id,source_order)。
+约束与索引：CHECK file_id IS NOT NULL OR status = 'failed'；CHECK status IN ('uploaded','queued','parsing','parsed','failed')；INDEX ix_import_items_batch_id(batch_id)；INDEX ix_import_items_batch_id_status(batch_id,status)；INDEX ix_import_items_file_id(file_id)；INDEX ix_import_items_resume_version_id(resume_version_id)；UNIQUE(batch_id,source_order)。
 
 ## index_records — 关系数据与向量索引映射
 

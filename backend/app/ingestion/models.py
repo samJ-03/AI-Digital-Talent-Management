@@ -28,7 +28,7 @@ class ImportItem(Base):
     """import_items：每份文件的导入处理。字段外键保护持久化引用，业务权限和状态转换由服务层控制。"""
     __tablename__ = "import_items"
     batch_id: Mapped[int] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("import_batches.id", name="fk_import_items_batch_id_import_batches", ondelete='RESTRICT'), nullable=False, comment='所属简历导入批次ID')
-    file_id: Mapped[int] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("stored_files.id", name="fk_import_items_file_id_stored_files", ondelete='RESTRICT'), nullable=False, comment='私有原始文件ID')
+    file_id: Mapped[int | None] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("stored_files.id", name="fk_import_items_file_id_stored_files", ondelete='RESTRICT'), nullable=True, comment='私有原始文件ID；仅上传前置失败时可空且状态必须failed')
     resume_version_id: Mapped[int | None] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("resume_versions.id", name="fk_import_items_resume_version_id_resume_versions", ondelete='RESTRICT'), nullable=True, comment='冻结的简历修订ID')
     status: Mapped[str] = mapped_column(sa.String(32), nullable=False, default="uploaded", server_default="uploaded", info={"allowed_values":["uploaded","queued","parsing","parsed","failed"]}, comment='业务生命周期状态；允许值：uploaded,queued,parsing,parsed,failed')
     error_code: Mapped[str | None] = mapped_column(sa.String(64), nullable=True, comment='允许记录的稳定错误码')
@@ -36,6 +36,7 @@ class ImportItem(Base):
     source_order: Mapped[int] = mapped_column(mysql.INTEGER(unsigned=True), nullable=False, comment='导入文件在批次中的顺序')
     __table_args__ = (
         sa.CheckConstraint("status IN ('uploaded','queued','parsing','parsed','failed')", name="ck_import_items_status"),
+        sa.CheckConstraint("file_id IS NOT NULL OR status = 'failed'", name="ck_import_items_failed_without_file"),
         sa.UniqueConstraint("batch_id", "source_order", name="uq_import_items_batch_id_source_order"),
         sa.Index("ix_import_items_batch_id", "batch_id"),
         sa.Index("ix_import_items_file_id", "file_id"),
