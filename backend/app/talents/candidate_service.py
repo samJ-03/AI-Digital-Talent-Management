@@ -144,7 +144,10 @@ class CandidateService(HrServiceBase):
                 peer=uow.session.scalar(select(Candidate).where(Candidate.id==root).with_for_update().execution_options(populate_existing=True))
                 if peer.status not in {'archived','merged'}:peer.status='duplicate_review'
         uow.session.flush()
-        pending=uow.session.scalar(select(DuplicateCase.id).where(or_(DuplicateCase.candidate_a_id==row.id,DuplicateCase.candidate_b_id==row.id),DuplicateCase.status=='pending').limit(1))
+        # Historical alias clues remain authoritative after identity merging.
+        identity=CanonicalResolver().resolve(uow,row.id)
+        identity_ids=(identity.root_id,*identity.alias_ids)
+        pending=uow.session.scalar(select(DuplicateCase.id).where(or_(DuplicateCase.candidate_a_id.in_(identity_ids),DuplicateCase.candidate_b_id.in_(identity_ids)),DuplicateCase.status=='pending').limit(1))
         row.status='duplicate_review' if pending else 'ready' if row.email_valid and row.email_normalized else 'pending_email'
 
     def _existing_profile_task(self,uow,cid,rid):

@@ -24,6 +24,7 @@ from app.runtime.router import router as runtime_router
 from app.files.router import router as files_router
 from app.ingestion.router import router as imports_router
 from app.talents.router import router as talents_router
+from app.talents.merge_router import router as duplicate_router
 from app.files.storage import S3FileStore
 from app.files.service import FileService
 
@@ -53,6 +54,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(files_router)
     app.include_router(imports_router)
     app.include_router(talents_router)
+    app.include_router(duplicate_router)
     app.include_router(ai_router)
     app.include_router(paper_router)
     app.include_router(jobs_router)

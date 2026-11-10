@@ -1096,7 +1096,7 @@ MergePlanner.apply(self, uow: SqlAlchemyUow, plan: MergePlan) -> MergeResult
 
 **类型与规则：** MergeDecision={decision,target_candidate_id?,application_resolutions:[{job_id,primary_application_id,secondary_application_ids}],reason}; MergePlan={canonical_root,aliases,application_mappings,conflicts}; MergeResult={canonical_candidate_id,application_mappings}; 不将历史表candidate_id搬家。
 
-- [ ] **T16.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T16.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_active_attempt_conflict_no_partial_commit(duplicate_service, hr_actor, conflict_case, merge_command):
@@ -1106,14 +1106,14 @@ def test_active_attempt_conflict_no_partial_commit(duplicate_service, hr_actor, 
     assert conflict_case.candidate_a.reload().merged_into_id is None
 ~~~
 
-- [ ] **T16.1.1** test_merge_two_historical_applications：双方有同岗位历史考试仍可合并并保留。
-- [ ] **T16.1.2** test_active_attempt_conflict_no_partial_commit：冲突409，无部分迁移。
-- [ ] **T16.1.3** test_merge_lock_order：按ID排序锁根，防并发反向死锁。
-- [ ] **T16.1.4** test_unknown_other_department_denied：不能借合并读无权限评价。
+- [x] **T16.1.1** test_merge_two_historical_applications：双方有同岗位历史考试仍可合并并保留。
+- [x] **T16.1.2** test_active_attempt_conflict_no_partial_commit：冲突409，无部分迁移。
+- [x] **T16.1.3** test_merge_lock_order：按ID排序锁根，防并发反向死锁。
+- [x] **T16.1.4** test_unknown_other_department_denied：不能借合并读无权限评价。
 
-- [ ] **T16.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T16.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T16.4 验证GREEN及异常。** 执行：
+- [x] **T16.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T16.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T16.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_candidate_merge.py -q
@@ -1121,8 +1121,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_ca
 
 预期：测试全部PASS、构建成功、退出0。完成条件：选择主应聘后次关系merged，原考试和版本归属不变；冲突需HR先处置，自动流程只处理主关系。；合并默认保留目标人才当前简历/共享画像指针，来源档案版本只作为历史聚合，HR明确修订才更换；去重结论使资料ready时追加一次pipeline.resume事件。
 
-- [ ] **T16.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t16-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T16.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T16.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t16-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T16.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/talents/merge_service.py' 'backend/app/talents/merge_router.py' 'backend/tests/integration/test_candidate_merge.py'
