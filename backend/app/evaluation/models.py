@@ -16,6 +16,7 @@ class EvaluationRun(Base):
     profile_id: Mapped[int] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("candidate_profiles.id", name="fk_evaluation_runs_profile_id_candidate_profiles", ondelete='RESTRICT'), nullable=False, comment='评估时冻结的通用人才画像ID')
     job_version_id: Mapped[int] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("job_versions.id", name="fk_evaluation_runs_job_version_id_job_versions", ondelete='RESTRICT'), nullable=False, comment='评估时冻结的岗位发布版本ID')
     state: Mapped[str] = mapped_column(sa.String(32), nullable=False, default="pending", server_default="pending", info={"allowed_values":["pending","screening","needs_review","screened_out","matching","matched","evaluation_failed"]}, comment='领域对象运行或审核状态；允许值：pending,screening,needs_review,screened_out,matching,matched,evaluation_failed')
+    screening_context: Mapped[Any] = mapped_column(sa.JSON(), nullable=False, default=dict, server_default=sa.text('(JSON_OBJECT())'), comment='冻结的评估日期、规则修订和来源摘要；旧记录为空不可重新解释')
     screening_result: Mapped[str | None] = mapped_column(sa.String(16), nullable=True, info={"allowed_values":["pass","fail","unknown"]}, comment='硬条件筛选结论：通过、不通过或未知；允许值：pass,fail,unknown')
     override_by: Mapped[int | None] = mapped_column(mysql.BIGINT(unsigned=True), sa.ForeignKey("users.id", name="fk_evaluation_runs_override_by_users", ondelete='RESTRICT'), nullable=True, comment='人工覆盖筛选结果的HR账号ID')
     override_reason: Mapped[str | None] = mapped_column(sa.Text(), nullable=True, comment='人工覆盖原因；必留审计')

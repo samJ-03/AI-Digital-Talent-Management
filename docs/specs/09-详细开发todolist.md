@@ -1267,7 +1267,7 @@ EvaluationService.get(self, actor: ActorContext, run_id: int) -> EvaluationDetai
 
 **类型与规则：** EvaluationRequest={resume_version_id?,reason}; EvaluationView/Detail见05；首次自动run.invitation_mode=auto_allowed，显式重评manual_only。覆盖写recruitment_events，不改已完成粗筛结果。
 
-- [ ] **T19.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T19.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_reevaluate_manual_only(evaluation_service, hr_actor, existing_application, reevaluation_cmd):
@@ -1276,15 +1276,15 @@ def test_reevaluate_manual_only(evaluation_service, hr_actor, existing_applicati
     assert existing_application.latest_run().invitation_mode == "manual_only"
 ~~~
 
-- [ ] **T19.1.1** test_one_canonical_application_per_job：锁canonical根复用同岗位关系。
-- [ ] **T19.1.2** test_missing_email_no_start：待邮箱/重复不进入自动评估。
-- [ ] **T19.1.3** test_override_keeps_original_result：覆盖有reason且不发卷。
-- [ ] **T19.1.4** test_stale_run_not_current：迟到旧任务不能覆盖新current指针。
-- [ ] **T19.1.5** test_reevaluate_manual_only：重评不自动重复邀请。
+- [x] **T19.1.1** test_one_canonical_application_per_job：锁canonical根复用同岗位关系。
+- [x] **T19.1.2** test_missing_email_no_start：待邮箱/重复不进入自动评估。
+- [x] **T19.1.3** test_override_keeps_original_result：覆盖有reason且不发卷。
+- [x] **T19.1.4** test_stale_run_not_current：迟到旧任务不能覆盖新current指针。
+- [x] **T19.1.5** test_reevaluate_manual_only：重评不自动重复邀请。
 
-- [ ] **T19.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T19.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T19.4 验证GREEN及异常。** 执行：
+- [x] **T19.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T19.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T19.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_evaluation_runs.py -q
@@ -1292,8 +1292,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_ev
 
 预期：测试全部PASS、构建成功、退出0。完成条件：原始粗筛输出、岗位/简历/画像版本都冻结，人工推进是独立决定。
 
-- [ ] **T19.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t19-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T19.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T19.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t19-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T19.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/recruitment/application_service.py' 'backend/app/evaluation/service.py' 'backend/app/evaluation/router.py' 'backend/tests/integration/test_evaluation_runs.py' 'backend/app/talents/router.py'

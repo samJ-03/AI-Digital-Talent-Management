@@ -2,7 +2,7 @@
 
 面向单企业外部人才招聘的开发中项目。管理员管理账号、权限与模型配置；HR开展招聘；候选人通过独立考试入口参与测评。AI辅助筛选、画像、匹配与评分，最终招聘结果由HR决定。智能培训当前只做框架。
 
-当前完成T01～T12：基础服务与40张表、账号权限、持久任务/Outbox、私有文件、模型与提示词配置、受控模型网关、题库与发布试卷、本地邮件配置、岗位版本与自动邀请配置。完整招聘流程和业务页面尚未完成，T13已增加[文本PDF/DOCX内部解析](docs/CORE_PARSER_SUPPORT.md)，已完成[字段提取](docs/RESUME_EXTRACTION_CONTRACT.md)与[T14批量导入受理](docs/IMPORT_BATCH_CONTRACT.md)，已增加[T15人才建档、邮箱门槛与简历修订](docs/CANDIDATE_MATERIALIZATION_CONTRACT.md)；已增加[T16人工去重与历史合并](docs/DUPLICATE_RESOLUTION_CONTRACT.md)；已增加[T17共享画像与恢复流程](docs/PROFILE_GENERATION_CONTRACT.md)；已增加[T18三态硬条件规则](docs/SCREENING_RULES_CONTRACT.md)；下一步T19应聘评估与人工覆盖；OCR和旧DOC转换仍未完成；按[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)先推进T30最小闭环。岗位阶段只生产扫描事件，实际邀考由T22/T23承接。上传前完整验证结果见开发记录，不把连接成功当业务验收。
+当前完成T01～T12：基础服务与40张表、账号权限、持久任务/Outbox、私有文件、模型与提示词配置、受控模型网关、题库与发布试卷、本地邮件配置、岗位版本与自动邀请配置。完整招聘流程和业务页面尚未完成，T13已增加[文本PDF/DOCX内部解析](docs/CORE_PARSER_SUPPORT.md)，已完成[字段提取](docs/RESUME_EXTRACTION_CONTRACT.md)与[T14批量导入受理](docs/IMPORT_BATCH_CONTRACT.md)，已增加[T15人才建档、邮箱门槛与简历修订](docs/CANDIDATE_MATERIALIZATION_CONTRACT.md)；已增加[T16人工去重与历史合并](docs/DUPLICATE_RESOLUTION_CONTRACT.md)；已增加[T17共享画像与恢复流程](docs/PROFILE_GENERATION_CONTRACT.md)；已增加[T18三态硬条件规则](docs/SCREENING_RULES_CONTRACT.md)；已增加[T19应聘关系、评估快照与人工覆盖](docs/EVALUATION_SNAPSHOTS_CONTRACT.md)；下一步T20向量索引；OCR和旧DOC转换仍未完成；按[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)先推进T30最小闭环。岗位阶段只生产扫描事件，实际邀考由T22/T23承接。上传前完整验证结果见开发记录，不把连接成功当业务验收。
 
 ## 技术组成
 
@@ -10,7 +10,7 @@
 |---|---|
 | 前端 | Next.js 16、React 19、TypeScript、Ant Design、TanStack Query |
 | 后端 | Python 3.11、FastAPI、Pydantic、SQLAlchemy、Alembic |
-| 业务事实 | MySQL 8；当前40张表、478个字段，表和字段均有中文COMMENT |
+| 业务事实 | MySQL 8；当前40张表、479个字段，表和字段均有中文COMMENT |
 | 异步任务 | Redis、Celery、事务Outbox与数据库租约 |
 | 文件和索引 | 私有MinIO、Milvus；向量索引可从业务事实重建 |
 | 模型 | DeepSeek deepseek-flash、百炼text-embedding-v3；可选本地Ollama与后续rerank |
@@ -68,7 +68,7 @@ init_env仅创建新.env，不覆盖已有文件，也不显示秘密；两个�
 - frontend/src：页面、公共Provider及同域API客户端。
 - infra：本项目Compose、反向代理与镜像锁定。
 - scripts、backend/tests、tests：初始化、检查、数据库字典导出与测试。
-- [数据库字典](docs/DATABASE.md)：全部40表、478字段、外键、约束与索引。
+- [数据库字典](docs/DATABASE.md)：全部40表、479字段、外键、约束与索引。
 - [注释及开发规范](docs/CONTRIBUTING.md)、[模型网关契约](docs/MODEL_GATEWAY_CONTRACT.md)、[开发续接记录](docs/DEVELOPMENT_HANDOFF.md)。
 - [岗位版本契约](docs/JOB_VERSIONS_CONTRACT.md)、[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)。
 - docs/specs：需求、架构、接口、验收和详细开发计划；原评审基线保留，最新实施差异以模型/数据库决策补充和开发记录为准。

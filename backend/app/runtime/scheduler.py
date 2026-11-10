@@ -71,6 +71,7 @@ def main():
     from app.runtime.outbox import OutboxDispatcher
     from app.runtime.worker import publish_job
     from app.talents.pipeline_resume import PipelineResume
+    from app.evaluation.initial_evaluation import InitialEvaluation
     engine=create_engine(Settings.load().database_url.get_secret_value(),pool_pre_ping=True)
     stop=threading.Event()
     for sig in (signal.SIGTERM,signal.SIGINT): signal.signal(sig,lambda *_:stop.set())
@@ -81,6 +82,8 @@ def main():
                 LeaseRecovery().requeue_expired(Clock().now(),100)
                 PipelineResume().recover_legacy(100)
                 PipelineResume().consume_due(100)
+                InitialEvaluation().recover_legacy(100)
+                InitialEvaluation().consume_due(100)
                 OutboxDispatcher(publisher=publish_job).dispatch_due(100)
                 stop.wait(3)
     finally: engine.dispose()

@@ -24,6 +24,9 @@ from app.core.secrets import SecretCipher
 from app.core.uow import make_uow
 mail_cipher=SecretCipher(settings.encryption_key.get_secret_value()) if settings.encryption_key else None
 HANDLERS={'system.verify':verify_runtime,'mail.test':MailTestHandler(make_uow,mail_cipher,settings)}
+from app.evaluation.service import EvaluationService
+from app.evaluation.worker import EvaluationHandler
+HANDLERS['application.evaluate']=EvaluationHandler(EvaluationService(make_uow))
 from app.ingestion.worker import ResumeParseHandler
 from app.files.service import FileService
 from app.files.storage import S3FileStore

@@ -10,7 +10,7 @@ from app.models import register_models
 def test_all_tables_and_columns_have_persisted_comments(db_engine):
     metadata=register_models();inspector=inspect(db_engine)
     assert len(metadata.tables)==40
-    assert sum(len(t.columns) for t in metadata.tables.values())==478
+    assert sum(len(t.columns) for t in metadata.tables.values())==479
     for table in metadata.tables.values():
         assert table.comment
         assert inspector.get_table_comment(table.name)['text']==table.comment

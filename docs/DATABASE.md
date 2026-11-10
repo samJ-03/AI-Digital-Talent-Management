@@ -1,6 +1,6 @@
 # 数据库模型字典
 
-由 scripts/export_schema_docs.py 从当前SQLAlchemy元数据生成。共40张表、478个字段；包含已实现与后续业务预建模型，存在表不代表相应业务接口已完成。
+由 scripts/export_schema_docs.py 从当前SQLAlchemy元数据生成。共40张表、479个字段；包含已实现与后续业务预建模型，存在表不代表相应业务接口已完成。
 
 统一约定：无符号自增ID通过API序列化为字符串；DATETIME(6)存UTC；row_version控制乐观锁；历史版本与审计不可随意覆盖；外键默认RESTRICT。
 
@@ -185,6 +185,7 @@
 | profile_id | BIGINT UNSIGNED | 否 | — | 评估时冻结的通用人才画像ID |
 | job_version_id | BIGINT UNSIGNED | 否 | — | 评估时冻结的岗位发布版本ID |
 | state | VARCHAR(32) | 否 | pending | 领域对象运行或审核状态；允许值：pending,screening,needs_review,screened_out,matching,matched,evaluation_failed |
+| screening_context | JSON | 否 | (JSON_OBJECT()) | 冻结的评估日期、规则修订和来源摘要；旧记录为空不可重新解释 |
 | screening_result | VARCHAR(16) | 是 | — | 硬条件筛选结论：通过、不通过或未知；允许值：pass,fail,unknown |
 | override_by | BIGINT UNSIGNED | 是 | — | 人工覆盖筛选结果的HR账号ID |
 | override_reason | TEXT | 是 | — | 人工覆盖原因；必留审计 |
