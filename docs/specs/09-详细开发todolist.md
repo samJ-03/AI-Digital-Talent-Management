@@ -1153,7 +1153,7 @@ ProfileService.revise(self, actor: ActorContext, candidate_id: int, cmd: Profile
 
 **类型与规则：** ProfileDraft={summary,skills,experiences,evidence}; ProfileRevision={base_profile_id,changes,reason}; ProfileView=共享字段＋authorized_application_views，后者从授权岗位动态查询，不传入共享AI摘要和向量。
 
-- [ ] **T17.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T17.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_no_private_interview_in_shared_summary(profile_service, hr_a, shared_candidate_with_private_note):
@@ -1162,14 +1162,14 @@ def test_no_private_interview_in_shared_summary(profile_service, hr_a, shared_ca
     assert all(v.department_id in hr_a.department_ids for v in profile.authorized_application_views)
 ~~~
 
-- [ ] **T17.1.1** test_no_private_interview_in_shared_summary：私有评价不进摘要/向量。
-- [ ] **T17.1.2** test_all_claims_have_sources：claim来源须存在且归属本人才。
-- [ ] **T17.1.3** test_no_exam_no_radar：无正式测评不画虚构能力雷达。
-- [ ] **T17.1.4** test_manual_revision_preserves_ai_version：手工改动新版本。
+- [x] **T17.1.1** test_no_private_interview_in_shared_summary：私有评价不进摘要/向量。
+- [x] **T17.1.2** test_all_claims_have_sources：claim来源须存在且归属本人才。
+- [x] **T17.1.3** test_no_exam_no_radar：无正式测评不画虚构能力雷达。
+- [x] **T17.1.4** test_manual_revision_preserves_ai_version：手工改动新版本。
 
-- [ ] **T17.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T17.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T17.4 验证GREEN及异常。** 执行：
+- [x] **T17.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T17.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T17.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_profile_sources.py -q
@@ -1177,8 +1177,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_pr
 
 预期：测试全部PASS、构建成功、退出0。完成条件：画像是可核查经历与评价视图，不生成性格、忠诚度或稳定性预测；版本记录完整。
 
-- [ ] **T17.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t17-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T17.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T17.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t17-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T17.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/talents/profile_service.py' 'backend/app/talents/profile_builder.py' 'backend/app/talents/profile_router.py' 'backend/tests/integration/test_profile_sources.py'

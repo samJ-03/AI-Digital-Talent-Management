@@ -28,6 +28,10 @@ from app.ingestion.worker import ResumeParseHandler
 from app.files.service import FileService
 from app.files.storage import S3FileStore
 from app.ai_runtime.gateway import ModelGateway
+from app.talents.profile_builder import ProfileBuilder
+from app.talents.profile_service import ProfileService
+from app.talents.profile_worker import ProfileBuildHandler
+HANDLERS['profile.build']=ProfileBuildHandler(ProfileService(make_uow,ProfileBuilder(ModelGateway(make_uow,mail_cipher))))
 if settings.minio_user and settings.minio_password:
     resume_store=S3FileStore.from_settings(settings)
     HANDLERS['resume.parse']=ResumeParseHandler(

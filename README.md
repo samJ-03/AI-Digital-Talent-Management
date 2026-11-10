@@ -2,7 +2,7 @@
 
 面向单企业外部人才招聘的开发中项目。管理员管理账号、权限与模型配置；HR开展招聘；候选人通过独立考试入口参与测评。AI辅助筛选、画像、匹配与评分，最终招聘结果由HR决定。智能培训当前只做框架。
 
-当前完成T01～T12：基础服务与40张表、账号权限、持久任务/Outbox、私有文件、模型与提示词配置、受控模型网关、题库与发布试卷、本地邮件配置、岗位版本与自动邀请配置。完整招聘流程和业务页面尚未完成，T13已增加[文本PDF/DOCX内部解析](docs/CORE_PARSER_SUPPORT.md)，已完成[字段提取](docs/RESUME_EXTRACTION_CONTRACT.md)与[T14批量导入受理](docs/IMPORT_BATCH_CONTRACT.md)，已增加[T15人才建档、邮箱门槛与简历修订](docs/CANDIDATE_MATERIALIZATION_CONTRACT.md)；已增加[T16人工去重与历史合并](docs/DUPLICATE_RESOLUTION_CONTRACT.md)；下一步T17画像生成；OCR和旧DOC转换仍未完成；按[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)先推进T30最小闭环。岗位阶段只生产扫描事件，实际邀考由T22/T23承接。上传前完整验证结果见开发记录，不把连接成功当业务验收。
+当前完成T01～T12：基础服务与40张表、账号权限、持久任务/Outbox、私有文件、模型与提示词配置、受控模型网关、题库与发布试卷、本地邮件配置、岗位版本与自动邀请配置。完整招聘流程和业务页面尚未完成，T13已增加[文本PDF/DOCX内部解析](docs/CORE_PARSER_SUPPORT.md)，已完成[字段提取](docs/RESUME_EXTRACTION_CONTRACT.md)与[T14批量导入受理](docs/IMPORT_BATCH_CONTRACT.md)，已增加[T15人才建档、邮箱门槛与简历修订](docs/CANDIDATE_MATERIALIZATION_CONTRACT.md)；已增加[T16人工去重与历史合并](docs/DUPLICATE_RESOLUTION_CONTRACT.md)；已增加[T17共享画像与恢复流程](docs/PROFILE_GENERATION_CONTRACT.md)；下一步T18硬规则筛选；OCR和旧DOC转换仍未完成；按[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)先推进T30最小闭环。岗位阶段只生产扫描事件，实际邀考由T22/T23承接。上传前完整验证结果见开发记录，不把连接成功当业务验收。
 
 ## 技术组成
 

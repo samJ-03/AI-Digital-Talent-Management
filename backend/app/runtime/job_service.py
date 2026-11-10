@@ -129,7 +129,7 @@ class BackgroundJobService:
         if job.lease_until<=utc_naive(self.clock.now()):
             raise DomainError('STALE_JOB_LEASE',409,'任务租约已失效')
         failure=isinstance(result,TerminalJobFailure)
-        safe={'SMTP_DELIVERY_UNKNOWN','SMTP_TEST_FAILED','MAIL_CONFIG_DISABLED','MAIL_TEST_EXPIRED','INVALID_OUTPUT','DEPENDENCY_UNAVAILABLE'}
+        safe={'SMTP_DELIVERY_UNKNOWN','SMTP_TEST_FAILED','MAIL_CONFIG_DISABLED','MAIL_TEST_EXPIRED','INVALID_OUTPUT','DEPENDENCY_UNAVAILABLE','PROFILE_CONFIG_UNAVAILABLE'}
         job.state='failed' if failure else 'succeeded'
         job.error_code=result.error_code if failure and result.error_code in safe else ('HANDLER_FAILED' if failure else None)
         job.lease_owner=None;job.lease_until=None;job.next_run_at=None

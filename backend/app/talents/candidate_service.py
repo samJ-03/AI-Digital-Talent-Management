@@ -24,10 +24,11 @@ from app.ingestion.extraction_types import ExtractedResume, ResumeFacts
 from app.files.models import StoredFile
 from app.recruitment.models import Application
 from app.runtime.job_service import BackgroundJobService, JobSpec
-from app.runtime.models import BackgroundJob
+from app.runtime.models import BackgroundJob,OutboxEvent
 from app.talents.models import Candidate, ResumeVersion, DuplicateCase
 from app.talents.identity_resolver import CanonicalResolver
 from app.talents.schemas import ContactsPatch, ResumeCorrection, MaterializationResult, TalentView, ResumeVersionView
+from app.talents.profile_jobs import active_profile_job
 
 
 def normalize_email(value):
@@ -156,6 +157,16 @@ class CandidateService(HrServiceBase):
     def _enqueue_profile(self,uow,row):
         if row.status!='ready' or not row.current_resume_version_id:return None
         rid=row.current_resume_version_id
+        active=active_profile_job(uow.session,row.id,rid)
+        if active is not None:return active
+        previous=uow.session.scalar(select(BackgroundJob).where(BackgroundJob.idempotency_key==f'profile.build:{row.id}:{rid}'))
+        if previous is not None and previous.state in {'failed','cancelled'}:
+            # A fresh HR contact action is an explicit recovery trigger. Keep
+            # the old task/history; the consumer decides whether work is needed.
+            key=f'pipeline.resume:contact:{row.id}:{rid}:{row.row_version}'
+            if uow.session.scalar(select(OutboxEvent.id).where(OutboxEvent.event_key==key)) is None:
+                uow.session.add(OutboxEvent(event_type='pipeline.resume',aggregate_type='candidate',aggregate_id=row.id,event_key=key,payload_refs={'candidate_id':row.id},state='pending'))
+            return previous.id
         return self.tasks.enqueue(uow,JobSpec('profile.build','candidate',row.id,f'profile.build:{row.id}:{rid}',{'candidate_id':row.id,'resume_version_id':rid}))
 
     def _row(self,uow,cid,expected=None):
