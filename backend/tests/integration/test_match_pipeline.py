@@ -143,3 +143,13 @@ def test_disabled_model_leaves_match_event_pending(matching):
         flow=uow.session.scalar(select(WorkflowConfig).where(WorkflowConfig.task_type=='match'));uow.session.get(ModelConfig,flow.model_config_id).enabled=False;uow.commit()
     assert MatchDispatch(factory).consume_due()==0
     with factory() as uow:assert uow.session.scalar(select(OutboxEvent).where(OutboxEvent.event_type=='evaluation.match.requested',OutboxEvent.aggregate_id==rid)).state=='pending'
+
+
+def test_evaluation_match_uses_public_dimensions_contract(matching):
+    """API041按已发布DTO返回dimensions，不暴露数据库列名。"""
+    rid,service=run_match(matching);result=service.match(rid);assert result.state=='valid'
+    client=matching[0][0][0][0]
+    response=client.get(f'/api/v1/evaluations/{rid}')
+    assert response.status_code==200,response.text
+    view=response.json()['data']['match']
+    assert len(view['dimensions'])==3 and 'dimension_scores' not in view

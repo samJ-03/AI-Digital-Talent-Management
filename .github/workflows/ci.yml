@@ -1,65 +1,41 @@
-name: Core checks
-on: [push, pull_request]
+name: Core and retained-backend checks
+'on': [push, pull_request]
 jobs:
   verify:
     runs-on: ubuntu-latest
-    env:
-      TALENT_TEST_DATABASE_URL: mysql+pymysql://talent:ci-only-ephemeral@127.0.0.1:3306/talent_test?charset=utf8mb4
-      TALENT_REDIS_URL: redis://127.0.0.1:6379/0
-      TALENT_MINIO_ENDPOINT: 127.0.0.1:9000
-      TALENT_MINIO_USER: ci-only-user
-      TALENT_MINIO_PASSWORD: ci-only-ephemeral-minio
-    services:
-      redis:
-        image: redis@sha256:8da19c7399dca900c6822a1cf30f9d2285585e2c4b457ff4095b0f4500054d3f
-        ports: ['6379:6379']
-        options: --health-cmd="redis-cli ping" --health-interval=5s --health-retries=20
-      mysql:
-        image: mysql@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
-        env:
-          MYSQL_ROOT_PASSWORD: ci-only-ephemeral-root
-          MYSQL_DATABASE: talent_test
-          MYSQL_USER: talent
-          MYSQL_PASSWORD: ci-only-ephemeral
-        ports: ['3306:3306']
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=5s --health-retries=30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
       - uses: actions/setup-node@v4
         with: {node-version: '24', cache: npm, cache-dependency-path: frontend/package-lock.json}
-      - run: python -m pip install -r backend/requirements.lock
-      - name: Start isolated MinIO
-        run: docker run --detach --name talent-ci-minio --publish 9000:9000 --env MINIO_ROOT_USER --env MINIO_ROOT_PASSWORD minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e server /data
-        env:
-          MINIO_ROOT_USER: ci-only-user
-          MINIO_ROOT_PASSWORD: ci-only-ephemeral-minio
-      - name: Start isolated Mailpit
-        run: docker run --detach --name talent-ci-mailpit --publish 127.0.0.1:1025:1025 --publish 127.0.0.1:8025:8025 axllent/mailpit@sha256:9b3a463be15354c0f0eba91697d80e3e0d8a5623ef0e627cacc836bc17fd5231
-      - name: Map test-only Mailpit alias on disposable runner
+      - name: Create disposable project configuration
+        run: python scripts/init_env.py
+      - name: Build locked Python images
         run: |
-          sudo python - <<'PY'
-          from pathlib import Path
-          with Path('/etc/hosts').open('a') as stream:
-              stream.write('\n127.0.0.1 mailpit\n')
-          PY
-      - name: Wait for MinIO readiness
+          docker build -f infra/Dockerfile.runtime -t ai-talent-runtime:dev .
+          python scripts/compose.py build api
+      - name: Start isolated test dependencies including retained semantic backend
+        run: python scripts/compose.py --profile test --profile semantic up -d --wait mysql mysql-test redis minio etcd milvus mailpit
+      - name: Backend regression with synthetic provider transports
+        run: python scripts/compose.py run --rm -T --no-deps -v "$PWD:/work:ro" -w /work api python -m pytest -q -p no:cacheprovider
+      - name: Export current schemas without refreshing reviewed manifest
         run: |
-          python - <<'PY'
-          import time, urllib.request
-          for attempt in range(30):
-              try:
-                  with urllib.request.urlopen('http://127.0.0.1:9000/minio/health/ready',timeout=2) as response:
-                      if response.status==200: break
-              except Exception:
-                  time.sleep(1)
-          else:
-              raise SystemExit('CI MinIO did not become ready')
-          PY
-      - run: python -m pytest -q
-      - run: npm ci --ignore-scripts --no-audit --no-fund
+          mkdir -p artifacts
+          python scripts/compose.py run --rm -T --no-deps -v "$PWD:/work:ro" -w /work api python scripts/export_openapi.py --output - > artifacts/openapi.json
+      - name: Check reviewed implemented contracts and explicit pending scope
+        run: python scripts/check_contract_coverage.py --manifest docs/api-manifest.json --openapi artifacts/openapi.json
+      - name: Install locked frontend tooling
+        run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: frontend
-      - run: npm run lint && npm run typecheck && npm run build
+      - name: Generate API types and detect drift
+        run: |
+          npm --prefix frontend run generate:api
+          git diff --exit-code -- frontend/src/generated/api-types.ts
+      - name: Frontend checks
+        run: npm run lint && npm run typecheck && npm run build
         working-directory: frontend
         env: {NEXT_TELEMETRY_DISABLED: '1'}
+      - name: Stop disposable project services
+        if: always()
+        run: python scripts/compose.py --profile test --profile semantic down

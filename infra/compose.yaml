@@ -60,6 +60,7 @@ services:
       retries: 30
     mem_limit: 384m
   etcd:
+    profiles: [semantic]
     image: quay.io/coreos/etcd@sha256:89b6debd43502d1088f3e02f39442fd3e951aa52bee846ed601cf4477114b89e
     command: [etcd, --advertise-client-urls=http://etcd:2379, --listen-client-urls=http://0.0.0.0:2379, --data-dir=/etcd]
     volumes: [etcd-data:/etcd]
@@ -70,6 +71,7 @@ services:
       retries: 30
     mem_limit: 256m
   milvus:
+    profiles: [semantic]
     image: milvusdb/milvus@sha256:fb57464669737ee9a9c43c6faa891527adab601241b0b488091c5f4eb4a13178
     command: [milvus, run, standalone]
     environment:

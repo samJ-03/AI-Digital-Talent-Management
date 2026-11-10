@@ -1,8 +1,10 @@
 # AI 数字化人才平台
 
-面向单企业外部人才招聘的开发中项目。管理员管理账号、权限与模型配置；HR开展招聘；候选人通过独立考试入口参与测评。AI辅助筛选、画像、匹配与评分，最终招聘结果由HR决定。智能培训当前只做框架。
+面向单企业外部人才招聘的开发中项目。管理员管理账号、权限与模型配置；HR开展招聘；候选人通过独立考试入口参与测评。AI辅助筛选、画像、匹配与评分，最终招聘结果由HR决定。智能培训（含框架展示）移二期。
 
-当前完成T01～T12：基础服务与40张表、账号权限、持久任务/Outbox、私有文件、模型与提示词配置、受控模型网关、题库与发布试卷、本地邮件配置、岗位版本与自动邀请配置。完整招聘流程和业务页面尚未完成，T13已增加[文本PDF/DOCX内部解析](docs/CORE_PARSER_SUPPORT.md)，已完成[字段提取](docs/RESUME_EXTRACTION_CONTRACT.md)与[T14批量导入受理](docs/IMPORT_BATCH_CONTRACT.md)，已增加[T15人才建档、邮箱门槛与简历修订](docs/CANDIDATE_MATERIALIZATION_CONTRACT.md)；已增加[T16人工去重与历史合并](docs/DUPLICATE_RESOLUTION_CONTRACT.md)；已增加[T17共享画像与恢复流程](docs/PROFILE_GENERATION_CONTRACT.md)；已增加[T18三态硬条件规则](docs/SCREENING_RULES_CONTRACT.md)；已增加[T19应聘关系、评估快照与人工覆盖](docs/EVALUATION_SNAPSHOTS_CONTRACT.md)；已增加[T20真实语义检索与T21证据匹配](docs/SEMANTIC_SEARCH_AND_MATCH_CONTRACT.md)；下一步T22邀请资格；OCR和旧DOC转换仍未完成；按[核心交付顺序](docs/CORE_DELIVERY_PRIORITY.md)先推进T30最小闭环。岗位阶段只生产扫描事件，实际邀考由T22/T23承接。上传前完整验证结果见开发记录，不把连接成功当业务验收。
+一期仅完成岗位/发布卷→文本简历导入/建档/去重→三态硬筛/共享画像/岗位匹配→唯一邀考→核验/答题/复核→HR决定。已验证模块见[当前handoff](docs/DEVELOPMENT_HANDOFF.md)，下一业务任务T22；尚未跑通完整邀考/考试和最小业务页面。
+
+[精简开发计划](docs/specs/09-详细开发todolist.md)保留真实依赖与二期表；知识、AI出题、看板、培训、部门负责人协作、OCR/旧DOC及高级语义界面二期。已完成T20后端保留可选，不作为一期匹配依赖。
 
 ## 技术组成
 
@@ -12,8 +14,8 @@
 | 后端 | Python 3.11、FastAPI、Pydantic、SQLAlchemy、Alembic |
 | 业务事实 | MySQL 8；当前40张表、479个字段，表和字段均有中文COMMENT |
 | 异步任务 | Redis、Celery、事务Outbox与数据库租约 |
-| 文件和索引 | 私有MinIO、Milvus；向量索引可从业务事实重建 |
-| 模型 | DeepSeek deepseek-flash、百炼text-embedding-v3；可选本地Ollama与后续rerank |
+| 文件和索引 | 一期私有MinIO；Milvus/etcd为可选semantic profile，已有向量索引可重建 |
+| 模型 | 一期DeepSeek deepseek-flash受控单次调用；百炼Embedding用于可选T20，rerank/Ollama后续评估 |
 
 实际依赖版本及镜像摘要以锁文件和infra/versions.lock.json为准。
 
@@ -27,7 +29,7 @@ cd AI-Digital-Talent-Management
 python -m venv .venv
 .venv\Scripts\python.exe scripts/init_env.py
 docker build -f infra/Dockerfile.runtime -t ai-talent-runtime:dev .
-.venv\Scripts\python.exe scripts/compose.py --profile test up -d --build --wait
+.venv\Scripts\python.exe scripts/compose.py up -d --build --wait
 .venv\Scripts\python.exe scripts/compose.py exec -T api alembic upgrade head
 .venv\Scripts\python.exe scripts/bootstrap_local.py
 ~~~
@@ -52,14 +54,20 @@ init_env仅创建新.env，不覆盖已有文件，也不显示秘密；两个�
 
 ## 验证
 
+默认核心启动不启动Milvus/etcd。完整回归仍覆盖保留的T20能力，因此显式启用semantic；不跳过旧测试，不因此删除数据。
+
 完整测试使用隔离talent_test，会迁移和重置测试数据，禁止指向talent_dev或其他已有数据库。
 
 ~~~bat
-.venv\Scripts\python.exe scripts/compose.py --profile test up -d mysql-test
+.venv\Scripts\python.exe scripts/compose.py --profile test --profile semantic up -d --wait mysql-test milvus
 .venv\Scripts\python.exe scripts/compose.py run --rm -T --no-deps -v "%CD%:/work:ro" -w /work api python -m pytest -q -p no:cacheprovider
 ~~~
 
 首次运行前完成上面的构建和启动。迁移往返、真实MySQL COMMENT、字段定义保真、权限隔离、幂等和模型错误处理都在测试范围。前端变更另运行npm run lint、npm run typecheck、npm run build。强制中断后先排除旧测试进程与隔离库残留，不要放宽保护逻辑消除失败。
+
+## 当前API契约
+
+按09的T38a用Compose加载本项目.env，在只读源码容器内执行scripts/export_openapi.py --output -，由宿主接收artifacts/openapi.json，再用纯标准库scripts/check_contract_coverage.py核对docs/api-manifest.json。宿主不需要另安装后端依赖或手动导出全部环境变量。现有接口缺失或关键DTO漂移会失败；一期待做和二期延期分别报告，G1才使用--require-complete。frontend的generate:api从该实际schema生成类型，不能自动刷新manifest掩盖漂移。
 
 ## 代码与文档导航
 

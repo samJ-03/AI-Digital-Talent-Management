@@ -60,13 +60,13 @@ class MatchService:
         return fingerprint([model.id,model.revision_no,model.provider_type,model.base_url,model.model_name,model.model_digest,model.capabilities,model.enabled,model.secret_ciphertext])
 
     def _eligible(self,uow,run):
-        if run.state!='matching' or run.screening_result!='pass' and not run.override_by or not self.evaluations._current(uow,run):raise DomainError('MATCH_SOURCE_STALE',409,'当前评估不可匹配')
+        if run.state!='matching' or run.screening_result!='pass' and not run.override_by or not self.evaluations.is_current(uow,run):raise DomainError('MATCH_SOURCE_STALE',409,'当前评估不可匹配')
         actor=ActorContext('hr',user_id=run.screening_context['initiator_user_id'])
-        self.evaluations.authorize(uow,actor,'evaluation.write',self.evaluations._scope(uow,run.application_id))
+        self.evaluations.authorize(uow,actor,'evaluation.write',self.evaluations.resource_scope(uow,run.application_id))
 
     def _evidence(self,uow,run):
         resume=uow.session.get(ResumeVersion,run.resume_version_id);version=uow.session.get(JobVersion,run.job_version_id)
-        catalog=fact_catalog(self.evaluations.candidates._resume_view(resume))
+        catalog=fact_catalog(self.evaluations.candidates.resume_view(resume))
         # 身份姓名不参与评分；联系方式从未进入catalog。
         evidence=[v for k,v in catalog.items() if k!='identity.name']
         evidence.append(Evidence(source_type='job_version',source_id=str(version.id),locator='description',quote=version.description))
@@ -121,7 +121,7 @@ class MatchService:
         except (DomainError,ValueError,TypeError,KeyError):pass
         result=MatchResult(evaluation_run_id=run.id,ai_run_id=ai_id,total_score=total,dimension_scores=dimensions,strengths=strengths,gaps=gaps,evidence=evidence,state=state)
         uow.session.add(result);uow.session.flush()
-        if self.evaluations._current(uow,run):run.state='matched' if state=='valid' else 'needs_review';run.error_code=None if state=='valid' else 'MATCH_NEEDS_REVIEW'
+        if self.evaluations.is_current(uow,run):run.state='matched' if state=='valid' else 'needs_review';run.error_code=None if state=='valid' else 'MATCH_NEEDS_REVIEW'
         return self._view(result)
 
     def match(self,run_id):

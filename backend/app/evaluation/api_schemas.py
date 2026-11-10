@@ -32,9 +32,18 @@ class EvaluationView(BaseModel):
     is_current: bool
     error_code: str|None
 
+class EvaluationMatchView(BaseModel):
+    """评估详情的匹配白名单，wire命名不泄露数据库列名。"""
+    state: str
+    total_score: str|None
+    dimensions: list[dict[str,Any]]
+    strengths: list[dict[str,Any]]
+    gaps: list[dict[str,Any]]
+    evidence: list[dict[str,Any]]
+
 class EvaluationDetail(EvaluationView):
     """白名单投影不包含部门面试、考试答卷或供应商原始响应。"""
     screening_context: dict[str,Any]
     conditions: list[dict[str,Any]]
-    match: dict[str,Any]|None
+    match: EvaluationMatchView|None
     override_events: list[dict[str,Any]]

@@ -63,7 +63,7 @@ class ProfileService(HrServiceBase):
         """模型调用只使用本次简历视图；不查询或传入任何部门私有记录。"""
         with self.uow_factory() as uow:
             row,resume=self._resume(uow,candidate_id,resume_version_id);config=self._config(uow)
-            view=self.candidates._resume_view(resume);snapshot=(row.id,resume.id,row.row_version,resume.row_version,row.current_profile_id,deepcopy(resume.structured_data))
+            view=self.candidates.resume_view(resume);snapshot=(row.id,resume.id,row.row_version,resume.row_version,row.current_profile_id,deepcopy(resume.structured_data))
         if self.builder is None:
             from app.core.settings import Settings
             from app.core.secrets import SecretCipher
@@ -81,7 +81,7 @@ class ProfileService(HrServiceBase):
         if self._config(uow)!=prepared.config:raise DomainError('AI_CONFIG_STALE',409,'画像配置已更新')
         run=uow.session.get(AiRun,prepared.draft.ai_run_id)
         if (run is None or run.state!='succeeded' or run.task_type!='profile' or run.validated_output!=prepared.draft.validated_output or run.source_refs!=[{'source_type':'resume_version','source_id':str(resume.id)}]):raise DomainError('PROFILE_SOURCE_INVALID',409,'画像运行证据不匹配')
-        output=bound_output(fact_catalog(self.candidates._resume_view(resume))).model_validate(run.validated_output)
+        output=bound_output(fact_catalog(self.candidates.resume_view(resume))).model_validate(run.validated_output)
         draft=draft_from_output(output,run.id)
         return self._insert(uow,row,resume,draft,None)
 
@@ -115,7 +115,7 @@ class ProfileService(HrServiceBase):
         resume=uow.session.get(ResumeVersion,profile.resume_version_id)
         if resume is None or CanonicalResolver().resolve(uow,resume.candidate_id).root_id!=CanonicalResolver().resolve(uow,profile.candidate_id).root_id:raise DomainError('PROFILE_SOURCE_INVALID',409,'画像简历归属不一致')
         if profile.source_record_refs!=[{'source_type':'resume_version','source_id':str(resume.id)}]:raise DomainError('PROFILE_SOURCE_INVALID',409,'共享画像含不受支持的来源')
-        catalog=fact_catalog(self.candidates._resume_view(resume));output=output_from_evidence(profile.evidence,catalog)
+        catalog=fact_catalog(self.candidates.resume_view(resume));output=output_from_evidence(profile.evidence,catalog)
         draft=draft_from_output(output)
         if (draft.summary,draft.skills,draft.experiences)!=(profile.summary,profile.skills,profile.experiences):raise DomainError('PROFILE_SOURCE_INVALID',409,'画像事实与来源不一致')
         if profile.ai_run_id:
@@ -168,7 +168,7 @@ class ProfileService(HrServiceBase):
             if row.current_profile_id!=cmd.base_profile_id:raise DomainError('VERSION_CONFLICT',409,'当前画像已更新')
             old=uow.session.get(CandidateProfile,cmd.base_profile_id);resume,output=self._validate(uow,old)
             if row.current_resume_version_id!=resume.id:raise DomainError('PROFILE_SOURCE_STALE',409,'画像所用简历已过期')
-            catalog=fact_catalog(self.candidates._resume_view(resume));data=output.model_dump(mode='json')
+            catalog=fact_catalog(self.candidates.resume_view(resume));data=output.model_dump(mode='json')
             if set(cmd.changes)-{'summary_claims','skills','experiences'}:raise DomainError('INVALID_PROFILE_REVISION',422,'不支持的画像修订字段')
             try:
                 for group,values in cmd.changes.items():

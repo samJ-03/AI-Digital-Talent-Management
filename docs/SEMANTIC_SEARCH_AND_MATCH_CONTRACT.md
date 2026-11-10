@@ -1,3 +1,5 @@
+> 2026-11-10一期修订：T20后端保留可选、semantic profile显式启动；T21直接读冻结履历/岗位，不依赖Milvus。高级语义界面/rerank/知识等二期。匹配执行改为单次受控网关，不编译图。
+
 # T20/T21 语义检索与岗位匹配契约
 
 ## 能力边界
@@ -10,7 +12,7 @@ T20实现API032 POST /api/v1/talents/search与API036 GET /api/v1/jobs/{job_id}/r
 
 search/router → TalentSearchService → ModelGateway.embed / MilvusStore → MySQL逐条复验。IndexService负责源快照和两阶段一致性；IndexRecovery从当前可信画像恢复持久profile.index任务。MilvusStore使用锁定的pymilvus SDK、显式schema、COSINE AUTOINDEX与Strong读取，不用内存列表模拟生产索引。
 
-evaluation/match_worker消费T19的evaluation.match.requested引用事件，创建application.match任务；MatchHandler在prepare阶段调用固定LangGraph/受控网关，不持身份锁；finalize在有效任务租约事务内复验并保存MatchResult。模型没有发信、改阶段或录用工具。
+evaluation/match_worker消费T19的evaluation.match.requested引用事件，创建application.match任务；MatchHandler在prepare阶段调用薄固定执行器/受控网关，不持身份锁；finalize在有效任务租约事务内复验并保存MatchResult。模型没有发信、改阶段或录用工具。
 
 ## 索引安全与代际
 

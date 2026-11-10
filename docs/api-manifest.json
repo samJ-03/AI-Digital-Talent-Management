@@ -1,0 +1,1493 @@
+{
+  "source": "Historical104 API IDs retained; phase and reviewed implemented schema snapshots are current. Refresh only after review.",
+  "operations": [
+    {
+      "id": "API-001",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/auth/login",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-002",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/auth/me",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-003",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/auth/logout",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-004",
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/users",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-005",
+      "method": "POST",
+      "path": "/api/v1/admin/users",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/users",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-006",
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/{id}",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/users/{user_id}",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-007",
+      "method": "GET",
+      "path": "/api/v1/admin/departments",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/departments",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-008",
+      "method": "POST",
+      "path": "/api/v1/admin/departments",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/departments",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-009",
+      "method": "PATCH",
+      "path": "/api/v1/admin/departments/{id}",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/departments/{department_id}",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-010",
+      "method": "GET",
+      "path": "/api/v1/admin/roles",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/roles",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-011",
+      "method": "POST",
+      "path": "/api/v1/admin/roles",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/roles",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-012",
+      "method": "PATCH",
+      "path": "/api/v1/admin/roles/{id}",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/roles/{role_id}",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-013",
+      "method": "PUT",
+      "path": "/api/v1/admin/users/{id}/roles",
+      "phase": "phase1",
+      "owner": "identity",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/users/{user_id}/roles",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-014",
+      "method": "GET",
+      "path": "/api/v1/jobs",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": false
+    },
+    {
+      "id": "API-015",
+      "method": "POST",
+      "path": "/api/v1/jobs",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs",
+      "response_fields": [
+        "auto_invite_enabled",
+        "current_version_id",
+        "department_id",
+        "headcount",
+        "id",
+        "owner_hr_id",
+        "status",
+        "title",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-016",
+      "method": "PATCH",
+      "path": "/api/v1/jobs/{id}",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}",
+      "response_fields": [
+        "auto_invite_enabled",
+        "current_version_id",
+        "department_id",
+        "headcount",
+        "id",
+        "owner_hr_id",
+        "status",
+        "title",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-017",
+      "method": "GET",
+      "path": "/api/v1/jobs/{id}",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": false
+    },
+    {
+      "id": "API-018",
+      "method": "POST",
+      "path": "/api/v1/jobs/{id}/versions",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}/versions",
+      "response_fields": [
+        "conditions",
+        "description",
+        "id",
+        "invite_threshold",
+        "invite_valid_hours",
+        "job_id",
+        "mail_template",
+        "match_weights",
+        "paper_version_id",
+        "published_at",
+        "published_by",
+        "status",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {
+        "match_weights": [
+          "experience",
+          "responsibilities",
+          "skills"
+        ],
+        "mail_template": [
+          "body",
+          "subject"
+        ]
+      }
+    },
+    {
+      "id": "API-019",
+      "method": "PATCH",
+      "path": "/api/v1/job-versions/{id}",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/job-versions/{version_id}",
+      "response_fields": [
+        "conditions",
+        "description",
+        "id",
+        "invite_threshold",
+        "invite_valid_hours",
+        "job_id",
+        "mail_template",
+        "match_weights",
+        "paper_version_id",
+        "published_at",
+        "published_by",
+        "status",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {
+        "match_weights": [
+          "experience",
+          "responsibilities",
+          "skills"
+        ],
+        "mail_template": [
+          "body",
+          "subject"
+        ]
+      }
+    },
+    {
+      "id": "API-020",
+      "method": "POST",
+      "path": "/api/v1/job-versions/{id}/publish",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/job-versions/{version_id}/publish",
+      "response_fields": [
+        "conditions",
+        "description",
+        "id",
+        "invite_threshold",
+        "invite_valid_hours",
+        "job_id",
+        "mail_template",
+        "match_weights",
+        "paper_version_id",
+        "published_at",
+        "published_by",
+        "status",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {
+        "match_weights": [
+          "experience",
+          "responsibilities",
+          "skills"
+        ],
+        "mail_template": [
+          "body",
+          "subject"
+        ]
+      }
+    },
+    {
+      "id": "API-021",
+      "method": "POST",
+      "path": "/api/v1/jobs/{id}/state",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}/state",
+      "response_fields": [
+        "auto_invite_enabled",
+        "current_version_id",
+        "department_id",
+        "headcount",
+        "id",
+        "owner_hr_id",
+        "status",
+        "title",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-022",
+      "method": "PUT",
+      "path": "/api/v1/jobs/{id}/automation",
+      "phase": "phase1",
+      "owner": "jobs",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}/automation",
+      "response_fields": [
+        "job",
+        "readiness"
+      ],
+      "nested_response_fields": {
+        "job": [
+          "auto_invite_enabled",
+          "current_version_id",
+          "department_id",
+          "headcount",
+          "id",
+          "owner_hr_id",
+          "status",
+          "title",
+          "version"
+        ],
+        "readiness": [
+          "blocking_reasons",
+          "ready"
+        ]
+      }
+    },
+    {
+      "id": "API-023",
+      "method": "POST",
+      "path": "/api/v1/imports",
+      "phase": "phase1",
+      "owner": "ingestion",
+      "implemented": true,
+      "actual_path": "/api/v1/imports",
+      "response_fields": [
+        "created_at",
+        "created_by",
+        "file_count",
+        "id",
+        "job_id",
+        "status"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-024",
+      "method": "GET",
+      "path": "/api/v1/imports",
+      "phase": "phase1",
+      "owner": "ingestion",
+      "implemented": true,
+      "actual_path": "/api/v1/imports",
+      "response_fields": [
+        "items",
+        "page",
+        "page_size",
+        "total"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-025",
+      "method": "GET",
+      "path": "/api/v1/imports/{id}",
+      "phase": "phase1",
+      "owner": "ingestion",
+      "implemented": true,
+      "actual_path": "/api/v1/imports/{batch_id}",
+      "response_fields": [
+        "created_at",
+        "created_by",
+        "file_count",
+        "id",
+        "items",
+        "job_id",
+        "status"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-026",
+      "method": "POST",
+      "path": "/api/v1/import-items/{id}/retry",
+      "phase": "phase1",
+      "owner": "ingestion",
+      "implemented": true,
+      "actual_path": "/api/v1/import-items/{item_id}/retry",
+      "response_fields": [
+        "poll_url",
+        "state",
+        "task_id"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-027",
+      "method": "GET",
+      "path": "/api/v1/talents",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": false
+    },
+    {
+      "id": "API-028",
+      "method": "GET",
+      "path": "/api/v1/talents/{id}",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": false
+    },
+    {
+      "id": "API-029",
+      "method": "PATCH",
+      "path": "/api/v1/talents/{id}/contacts",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/{candidate_id}/contacts",
+      "response_fields": [
+        "canonical_candidate_id",
+        "current_profile_id",
+        "education",
+        "email_masked",
+        "id",
+        "major",
+        "name",
+        "skills",
+        "status",
+        "version",
+        "years_experience"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-030",
+      "method": "POST",
+      "path": "/api/v1/talents/{id}/resume-corrections",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/{candidate_id}/resume-corrections",
+      "response_fields": [
+        "candidate_id",
+        "change_reason",
+        "field_sources",
+        "file_id",
+        "id",
+        "parent_version_id",
+        "parser_revision",
+        "raw_text",
+        "state",
+        "structured_data",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-031",
+      "method": "GET",
+      "path": "/api/v1/talents/{id}/resumes",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": false
+    },
+    {
+      "id": "API-032",
+      "method": "POST",
+      "path": "/api/v1/talents/search",
+      "phase": "optional",
+      "owner": "search",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/search",
+      "response_fields": [
+        "degraded",
+        "items",
+        "query"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-033",
+      "method": "GET",
+      "path": "/api/v1/duplicates",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/duplicates",
+      "response_fields": [
+        "items",
+        "page",
+        "page_size",
+        "total"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-034",
+      "method": "POST",
+      "path": "/api/v1/duplicates/{id}/resolve",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/duplicates/{case_id}/resolve",
+      "response_fields": [
+        "application_mappings",
+        "canonical_candidate_id"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-035",
+      "method": "POST",
+      "path": "/api/v1/talents/{id}/archive",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/{candidate_id}/archive",
+      "response_fields": [
+        "canonical_candidate_id",
+        "current_profile_id",
+        "education",
+        "email_masked",
+        "id",
+        "major",
+        "name",
+        "skills",
+        "status",
+        "version",
+        "years_experience"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-036",
+      "method": "GET",
+      "path": "/api/v1/jobs/{id}/recommendations",
+      "phase": "optional",
+      "owner": "search",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}/recommendations",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-037",
+      "method": "POST",
+      "path": "/api/v1/jobs/{id}/applications",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": true,
+      "actual_path": "/api/v1/jobs/{job_id}/applications",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-038",
+      "method": "GET",
+      "path": "/api/v1/applications",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": false
+    },
+    {
+      "id": "API-039",
+      "method": "GET",
+      "path": "/api/v1/applications/{id}",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": false
+    },
+    {
+      "id": "API-040",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/evaluations",
+      "phase": "phase1",
+      "owner": "evaluation",
+      "implemented": true,
+      "actual_path": "/api/v1/applications/{application_id}/evaluations",
+      "response_fields": [
+        "evaluation_id",
+        "poll_url",
+        "state",
+        "task_id"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-041",
+      "method": "GET",
+      "path": "/api/v1/evaluations/{id}",
+      "phase": "phase1",
+      "owner": "evaluation",
+      "implemented": true,
+      "actual_path": "/api/v1/evaluations/{run_id}",
+      "response_fields": [
+        "application_id",
+        "conditions",
+        "error_code",
+        "id",
+        "invitation_mode",
+        "is_current",
+        "job_version_id",
+        "match",
+        "override_events",
+        "profile_id",
+        "resume_version_id",
+        "screening_context",
+        "screening_result",
+        "state"
+      ],
+      "nested_response_fields": {
+        "match": [
+          "dimensions",
+          "evidence",
+          "gaps",
+          "state",
+          "strengths",
+          "total_score"
+        ]
+      }
+    },
+    {
+      "id": "API-042",
+      "method": "POST",
+      "path": "/api/v1/evaluations/{id}/override",
+      "phase": "phase1",
+      "owner": "evaluation",
+      "implemented": true,
+      "actual_path": "/api/v1/evaluations/{run_id}/override",
+      "response_fields": [
+        "application_id",
+        "conditions",
+        "error_code",
+        "id",
+        "invitation_mode",
+        "is_current",
+        "job_version_id",
+        "match",
+        "override_events",
+        "profile_id",
+        "resume_version_id",
+        "screening_context",
+        "screening_result",
+        "state"
+      ],
+      "nested_response_fields": {
+        "match": [
+          "dimensions",
+          "evidence",
+          "gaps",
+          "state",
+          "strengths",
+          "total_score"
+        ]
+      }
+    },
+    {
+      "id": "API-043",
+      "method": "GET",
+      "path": "/api/v1/talents/{id}/profile",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/{candidate_id}/profile",
+      "response_fields": [
+        "ai_run_id",
+        "authorized_application_views",
+        "candidate_id",
+        "confirmed_by",
+        "evidence",
+        "experiences",
+        "id",
+        "resume_version_id",
+        "skills",
+        "source_record_refs",
+        "summary",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-044",
+      "method": "POST",
+      "path": "/api/v1/talents/{id}/profile-revisions",
+      "phase": "phase1",
+      "owner": "talents",
+      "implemented": true,
+      "actual_path": "/api/v1/talents/{candidate_id}/profile-revisions",
+      "response_fields": [
+        "ai_run_id",
+        "authorized_application_views",
+        "candidate_id",
+        "confirmed_by",
+        "evidence",
+        "experiences",
+        "id",
+        "resume_version_id",
+        "skills",
+        "source_record_refs",
+        "summary",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-045",
+      "method": "GET",
+      "path": "/api/v1/jobs/{id}/matches",
+      "phase": "phase1",
+      "owner": "evaluation",
+      "implemented": false
+    },
+    {
+      "id": "API-046",
+      "method": "GET",
+      "path": "/api/v1/question-banks",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-047",
+      "method": "POST",
+      "path": "/api/v1/question-banks",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/question-banks",
+      "response_fields": [
+        "department_id",
+        "id",
+        "name",
+        "status",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-048",
+      "method": "POST",
+      "path": "/api/v1/questions",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/questions",
+      "response_fields": [
+        "answer_key",
+        "bank_id",
+        "id",
+        "logical_key",
+        "options",
+        "reference_sources",
+        "revision_no",
+        "rubric",
+        "state",
+        "stem",
+        "type",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-049",
+      "method": "GET",
+      "path": "/api/v1/questions",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-050",
+      "method": "POST",
+      "path": "/api/v1/questions/{id}/revisions",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/questions/{question_id}/revisions",
+      "response_fields": [
+        "answer_key",
+        "bank_id",
+        "id",
+        "logical_key",
+        "options",
+        "reference_sources",
+        "revision_no",
+        "rubric",
+        "state",
+        "stem",
+        "type",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-051",
+      "method": "POST",
+      "path": "/api/v1/questions/{id}/approve",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/questions/{question_id}/approve",
+      "response_fields": [
+        "answer_key",
+        "bank_id",
+        "id",
+        "logical_key",
+        "options",
+        "reference_sources",
+        "revision_no",
+        "rubric",
+        "state",
+        "stem",
+        "type",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-052",
+      "method": "POST",
+      "path": "/api/v1/question-generations",
+      "phase": "phase2",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-053",
+      "method": "GET",
+      "path": "/api/v1/papers",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-054",
+      "method": "POST",
+      "path": "/api/v1/papers",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/papers",
+      "response_fields": [
+        "department_id",
+        "id",
+        "name",
+        "status",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-055",
+      "method": "POST",
+      "path": "/api/v1/papers/{id}/versions",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/papers/{paper_id}/versions",
+      "response_fields": [
+        "duration_minutes",
+        "id",
+        "items",
+        "paper_id",
+        "published_at",
+        "reference_pass_score",
+        "status",
+        "total_score",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-056",
+      "method": "PATCH",
+      "path": "/api/v1/paper-versions/{id}",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/paper-versions/{version_id}",
+      "response_fields": [
+        "duration_minutes",
+        "id",
+        "items",
+        "paper_id",
+        "published_at",
+        "reference_pass_score",
+        "status",
+        "total_score",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-057",
+      "method": "GET",
+      "path": "/api/v1/paper-versions/{id}",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/paper-versions/{version_id}",
+      "response_fields": [
+        "duration_minutes",
+        "id",
+        "items",
+        "paper_id",
+        "published_at",
+        "reference_pass_score",
+        "status",
+        "total_score",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-058",
+      "method": "POST",
+      "path": "/api/v1/paper-versions/{id}/publish",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": true,
+      "actual_path": "/api/v1/paper-versions/{version_id}/publish",
+      "response_fields": [
+        "duration_minutes",
+        "id",
+        "items",
+        "paper_id",
+        "published_at",
+        "reference_pass_score",
+        "status",
+        "total_score",
+        "version",
+        "version_no"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-059",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/invitations",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-060",
+      "method": "GET",
+      "path": "/api/v1/exam-attempts",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-061",
+      "method": "POST",
+      "path": "/api/v1/exam-attempts/{id}/resend",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-062",
+      "method": "POST",
+      "path": "/api/v1/exam-attempts/{id}/revoke",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-063",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/exam-rounds",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-064",
+      "method": "POST",
+      "path": "/api/v1/candidate/access/exchange",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-065",
+      "method": "POST",
+      "path": "/api/v1/candidate/access/send-code",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-066",
+      "method": "POST",
+      "path": "/api/v1/candidate/access/verify",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-067",
+      "method": "GET",
+      "path": "/api/v1/candidate/exam",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-068",
+      "method": "POST",
+      "path": "/api/v1/candidate/exam/start",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-069",
+      "method": "PUT",
+      "path": "/api/v1/candidate/exam/answers/{paper_item_id}",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-070",
+      "method": "POST",
+      "path": "/api/v1/candidate/exam/submit",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-071",
+      "method": "GET",
+      "path": "/api/v1/candidate/exam/receipt",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-072",
+      "method": "GET",
+      "path": "/api/v1/exam-attempts/{id}/grading",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-073",
+      "method": "PUT",
+      "path": "/api/v1/exam-answers/{id}/review",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-074",
+      "method": "POST",
+      "path": "/api/v1/exam-attempts/{id}/finalize",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-075",
+      "method": "POST",
+      "path": "/api/v1/exam-attempts/{id}/reopen-review",
+      "phase": "phase1",
+      "owner": "assessment",
+      "implemented": false
+    },
+    {
+      "id": "API-076",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/stage-transitions",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": false
+    },
+    {
+      "id": "API-077",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/reopen",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": false
+    },
+    {
+      "id": "API-078",
+      "method": "POST",
+      "path": "/api/v1/applications/{id}/interview-notes",
+      "phase": "phase1",
+      "owner": "recruitment",
+      "implemented": false
+    },
+    {
+      "id": "API-079",
+      "method": "POST",
+      "path": "/api/v1/knowledge/documents",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-080",
+      "method": "GET",
+      "path": "/api/v1/knowledge/documents",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-081",
+      "method": "POST",
+      "path": "/api/v1/knowledge/documents/{id}/publish",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-082",
+      "method": "POST",
+      "path": "/api/v1/knowledge/documents/{id}/archive",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-083",
+      "method": "POST",
+      "path": "/api/v1/knowledge/documents/{id}/revisions",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-084",
+      "method": "POST",
+      "path": "/api/v1/knowledge/ask",
+      "phase": "phase2",
+      "owner": "knowledge",
+      "implemented": false
+    },
+    {
+      "id": "API-085",
+      "method": "GET",
+      "path": "/api/v1/reports/recruitment",
+      "phase": "phase2",
+      "owner": "reporting",
+      "implemented": false
+    },
+    {
+      "id": "API-086",
+      "method": "GET",
+      "path": "/api/v1/workbench/todos",
+      "phase": "phase2",
+      "owner": "reporting",
+      "implemented": false
+    },
+    {
+      "id": "API-087",
+      "method": "GET",
+      "path": "/api/v1/admin/model-configs",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": false
+    },
+    {
+      "id": "API-088",
+      "method": "POST",
+      "path": "/api/v1/admin/model-configs",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/model-configs",
+      "response_fields": [
+        "base_url",
+        "capabilities",
+        "embedding_dimension",
+        "enabled",
+        "id",
+        "logical_key",
+        "model_digest",
+        "model_name",
+        "provider_type",
+        "revision_no",
+        "secret_configured",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-089",
+      "method": "POST",
+      "path": "/api/v1/admin/model-configs/{id}/test",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/model-configs/{config_id}/test",
+      "response_fields": [
+        "capabilities",
+        "embedding_dimension",
+        "error_code",
+        "model_digest",
+        "verified"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-090",
+      "method": "GET",
+      "path": "/api/v1/admin/workflows",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/workflows",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-091",
+      "method": "PUT",
+      "path": "/api/v1/admin/workflows/{task_type}",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/workflows/{task_type}",
+      "response_fields": [
+        "config_revision",
+        "enabled",
+        "id",
+        "max_retries",
+        "model_config_id",
+        "prompt_version_id",
+        "task_type",
+        "timeout_seconds",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-092",
+      "method": "POST",
+      "path": "/api/v1/admin/prompts",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/prompts",
+      "response_fields": [
+        "content",
+        "id",
+        "output_schema",
+        "published_by",
+        "revision_no",
+        "status",
+        "task_type",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-093",
+      "method": "POST",
+      "path": "/api/v1/admin/prompts/{id}/publish",
+      "phase": "phase1",
+      "owner": "ai_runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/prompts/{prompt_id}/publish",
+      "response_fields": [
+        "content",
+        "id",
+        "output_schema",
+        "published_by",
+        "revision_no",
+        "status",
+        "task_type",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-094",
+      "method": "GET",
+      "path": "/api/v1/admin/runtime",
+      "phase": "phase1",
+      "owner": "runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/runtime",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-095",
+      "method": "GET",
+      "path": "/api/v1/admin/audit-logs",
+      "phase": "phase2",
+      "owner": "identity",
+      "implemented": false
+    },
+    {
+      "id": "API-096",
+      "method": "POST",
+      "path": "/api/v1/admin/mail-configs",
+      "phase": "phase1",
+      "owner": "notifications",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/mail-configs",
+      "response_fields": [
+        "id",
+        "public_base_url",
+        "revision_no",
+        "secret_configured",
+        "sender_address",
+        "smtp_host",
+        "smtp_port",
+        "state",
+        "tls_mode",
+        "username_configured",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-097",
+      "method": "POST",
+      "path": "/api/v1/admin/mail-configs/{id}/test",
+      "phase": "phase1",
+      "owner": "notifications",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/mail-configs/{config_id}/test",
+      "response_fields": [
+        "poll_url",
+        "state",
+        "task_id"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-098",
+      "method": "GET",
+      "path": "/api/v1/tasks/{id}",
+      "phase": "phase1",
+      "owner": "runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/tasks/{task_id}",
+      "response_fields": [
+        "entity_id",
+        "entity_type",
+        "error_code",
+        "id",
+        "progress",
+        "retryable",
+        "state"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-099",
+      "method": "GET",
+      "path": "/api/v1/files/{id}/download",
+      "phase": "phase1",
+      "owner": "files",
+      "implemented": true,
+      "actual_path": "/api/v1/files/{file_id}/download",
+      "response_fields": [],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-100",
+      "method": "GET",
+      "path": "/api/v1/health/live",
+      "phase": "phase1",
+      "owner": "runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/health/live",
+      "response_fields": [
+        "alive"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-101",
+      "method": "GET",
+      "path": "/api/v1/health/ready",
+      "phase": "phase1",
+      "owner": "runtime",
+      "implemented": true,
+      "actual_path": "/api/v1/health/ready",
+      "response_fields": [
+        "dependencies",
+        "ready"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-102",
+      "method": "GET",
+      "path": "/api/v1/admin/mail-configs",
+      "phase": "phase1",
+      "owner": "notifications",
+      "implemented": false
+    },
+    {
+      "id": "API-103",
+      "method": "POST",
+      "path": "/api/v1/admin/mail-configs/{id}/activate",
+      "phase": "phase1",
+      "owner": "notifications",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/mail-configs/{config_id}/activate",
+      "response_fields": [
+        "id",
+        "public_base_url",
+        "revision_no",
+        "secret_configured",
+        "sender_address",
+        "smtp_host",
+        "smtp_port",
+        "state",
+        "tls_mode",
+        "username_configured",
+        "version"
+      ],
+      "nested_response_fields": {}
+    },
+    {
+      "id": "API-104",
+      "method": "POST",
+      "path": "/api/v1/admin/mail-configs/{id}/disable",
+      "phase": "phase1",
+      "owner": "notifications",
+      "implemented": true,
+      "actual_path": "/api/v1/admin/mail-configs/{config_id}/disable",
+      "response_fields": [
+        "id",
+        "public_base_url",
+        "revision_no",
+        "secret_configured",
+        "sender_address",
+        "smtp_host",
+        "smtp_port",
+        "state",
+        "tls_mode",
+        "username_configured",
+        "version"
+      ],
+      "nested_response_fields": {}
+    }
+  ]
+}

@@ -21,3 +21,7 @@
 |TALENT_SEMANTIC_MIN_RELEVANCE|0.0|余弦阈值-1～1，与岗位匹配分无关|
 
 两个.env模板保持一致，Compose将这些变量传给API/Worker/Scheduler。仅配置地址不会启用付费模型。embedding和match由管理员选用已验证模型、发布匹配schema并明确启用；说明见SEMANTIC_SEARCH_AND_MATCH_CONTRACT.md。
+
+## 一期核心与可选语义启动
+
+默认Compose只启动核心服务；Milvus/etcd使用semantic profile，现有数据/定义保留。启用为python scripts/compose.py --profile semantic up -d milvus。默认preflight dev/test不要求Milvus；若验收该可选能力，在required_services显式列milvus并提供实际协议探针。完整后端回归包含T20，必须先显式启动semantic，不能跳过已有测试冒充通过。

@@ -124,3 +124,12 @@ def test_service_probe_identity_cannot_be_substituted():
 def test_unknown_profile_rejected():
     with pytest.raises(ValueError, match="profile"):
         PreflightConfig(profile="typo")
+
+
+def test_core_preflight_does_not_require_optional_milvus():
+    core=('mysql','redis','minio','model','mail')
+    probe=lambda name,endpoint:CheckResult(name=name,ok=True)
+    report=PreflightChecker(runner=RuntimeRunner(),service_probe=probe).run(PreflightConfig(profile='dev',services={name:'https://readiness.invalid' for name in core}))
+    assert report.ready and not any(c.name=='milvus' for c in report.checks)
+    explicit=PreflightChecker(runner=RuntimeRunner(),service_probe=probe).run(PreflightConfig(profile='test',required_services=('milvus',)))
+    assert not explicit.ready and 'MILVUS_ENDPOINT_REQUIRED' in explicit.blocked_reasons

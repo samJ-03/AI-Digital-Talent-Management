@@ -1,4 +1,4 @@
-"""平台开发工具：提供verify dependencies命令行工具；仅操作本项目资源。"""
+"""验证已锁定安装包完整性，不等于这些包都属于一期业务必需依赖。"""
 from __future__ import annotations
 import importlib
 import json

@@ -138,7 +138,7 @@ class PreflightChecker:
             blocked.append("LINUX_ENGINE_REQUIRED")
         required_services = config.required_services
         if not required_services and config.profile != "bootstrap":
-            required_services = ("mysql", "redis", "minio", "milvus", "model", "mail")
+            required_services = ("mysql", "redis", "minio", "model", "mail")
         for name in required_services:
             endpoint = config.services.get(name)
             if not endpoint:

@@ -22,7 +22,7 @@ from app.talents.profile_service import ProfileService
 from app.evaluation.models import EvaluationRun,ScreeningDetail,MatchResult
 from app.evaluation.rules import ScreeningEngine
 from app.ingestion.extraction_types import ResumeFacts
-from app.evaluation.api_schemas import EvaluationView,EvaluationDetail,EvaluationAccepted
+from app.evaluation.api_schemas import EvaluationView,EvaluationDetail,EvaluationAccepted,EvaluationMatchView
 from app.runtime.models import BackgroundJob,OutboxEvent
 from app.runtime.job_service import BackgroundJobService,JobSpec,utc_naive
 
@@ -38,7 +38,8 @@ class EvaluationService(HrServiceBase):
         super().__init__(uow_factory,idempotency_key)
         self.candidates=CandidateService(uow_factory);self.profiles=ProfileService(uow_factory)
 
-    def _scope(self,uow,application_id):
+    def resource_scope(self,uow,application_id):
+        """返回应聘所属部门范围；调用方在同一UoW内执行权限复验。"""
         app=uow.session.get(Application,application_id)
         job=uow.session.get(Job,app.job_id) if app else None
         if job is None:raise DomainError('RESOURCE_NOT_FOUND',404,'应聘关系不存在')
@@ -75,7 +76,7 @@ class EvaluationService(HrServiceBase):
     def start(self,actor,application_id,cmd):
         """人工重评只切换当前评估，不重置阶段、轮次或既有考试。"""
         with self.candidates.identity_write():
-            with self.uow_factory() as uow:scope=self._scope(uow,application_id)
+            with self.uow_factory() as uow:scope=self.resource_scope(uow,application_id)
             def command(uow,fresh):
                 app=uow.session.scalar(select(Application).where(Application.id==application_id).with_for_update())
                 run,tid=self.create_snapshot(uow,fresh,app,'manual_only','hr-reevaluate',cmd.resume_version_id)
@@ -83,11 +84,12 @@ class EvaluationService(HrServiceBase):
                 return ResultRef('evaluation',run.id,202)
             ref=self.execute(actor,'evaluation.write',scope,'evaluation.start',{'application_id':application_id,**cmd.model_dump()},command,'evaluation.read')
             with self.uow_factory() as uow:
-                self.authorize(uow,actor,'evaluation.read',self._scope(uow,application_id))
+                self.authorize(uow,actor,'evaluation.read',self.resource_scope(uow,application_id))
                 tid=uow.session.scalar(select(BackgroundJob.id).where(BackgroundJob.idempotency_key==f'evaluation:{ref.entity_id}'))
                 return EvaluationAccepted(evaluation_id=str(ref.entity_id),task_id=str(tid),state='queued',poll_url=f'/api/v1/tasks/{tid}')
 
-    def _current(self,uow,run):
+    def is_current(self,uow,run):
+        """复验当前指针和冻结来源；不提交调用方事务，不作为独立授权入口。"""
         app=uow.session.get(Application,run.application_id)
         if app is None or app.current_evaluation_id!=run.id:return False
         try:
@@ -96,7 +98,7 @@ class EvaluationService(HrServiceBase):
         except DomainError:return False
 
     def _view(self,uow,run):
-        return EvaluationView(id=str(run.id),application_id=str(run.application_id),resume_version_id=str(run.resume_version_id),profile_id=str(run.profile_id),job_version_id=str(run.job_version_id),state=run.state,screening_result=run.screening_result,invitation_mode=run.invitation_mode,is_current=self._current(uow,run),error_code=run.error_code)
+        return EvaluationView(id=str(run.id),application_id=str(run.application_id),resume_version_id=str(run.resume_version_id),profile_id=str(run.profile_id),job_version_id=str(run.job_version_id),state=run.state,screening_result=run.screening_result,invitation_mode=run.invitation_mode,is_current=self.is_current(uow,run),error_code=run.error_code)
 
     def _match_request(self,uow,run):
         key=f'evaluation-match:{run.id}'
@@ -114,7 +116,7 @@ class EvaluationService(HrServiceBase):
             if not context or context.get('normalization_revision')!='screening-core-v1' or context.get('dictionary_revision')!='core-major-v1' or self._hashes(resume,profile,version)!=context.get('source_hashes'):raise DomainError('EVALUATION_SOURCE_STALE',409,'冻结来源或规则不可验证')
             self.profiles._validate(uow,profile)
             actor=ActorContext('hr',user_id=context['initiator_user_id'])
-            self.authorize(uow,actor,'evaluation.write',self._scope(uow,run.application_id))
+            self.authorize(uow,actor,'evaluation.write',self.resource_scope(uow,run.application_id))
             facts=ResumeFacts.model_validate(resume.structured_data)
             report=ScreeningEngine(as_of=date.fromisoformat(context['as_of']),dictionary_revision=context['dictionary_revision'],relevant_employment_indices=context.get('relevant_employment_indices')).evaluate(facts,version.conditions)
         except (DomainError,ValueError,KeyError,TypeError):
@@ -124,7 +126,7 @@ class EvaluationService(HrServiceBase):
         for detail in report.details:
             uow.session.add(ScreeningDetail(evaluation_run_id=run.id,condition_key=detail.condition_key,required=detail.required,expected=detail.expected,actual=detail.actual,result=detail.result,evidence=[e.model_dump(mode='json') for e in detail.evidence]))
         run.state={'pass':'matching','fail':'screened_out','unknown':'needs_review'}[report.result]
-        if self._current(uow,run):
+        if self.is_current(uow,run):
             if report.result=='pass':self._match_request(uow,run)
         else:run.error_code='EVALUATION_SUPERSEDED'
         uow.session.flush();return self._view(uow,run)
@@ -140,11 +142,11 @@ class EvaluationService(HrServiceBase):
             with self.uow_factory() as uow:
                 run=uow.session.get(EvaluationRun,run_id)
                 if run is None:raise DomainError('RESOURCE_NOT_FOUND',404,'评估不存在')
-                scope=self._scope(uow,run.application_id)
+                scope=self.resource_scope(uow,run.application_id)
             if not isinstance(reason,str) or not reason.strip() or len(reason)>500:raise DomainError('INVALID_REASON',422,'需要有效人工理由')
             def command(uow,fresh):
                 run=uow.session.scalar(select(EvaluationRun).where(EvaluationRun.id==run_id).with_for_update())
-                if not self._current(uow,run) or run.screening_result not in {'fail','unknown'} or run.state not in {'screened_out','needs_review'} or run.override_by:raise DomainError('EVALUATION_OVERRIDE_BLOCKED',409,'评估已变化或不满足人工继续前提')
+                if not self.is_current(uow,run) or run.screening_result not in {'fail','unknown'} or run.state not in {'screened_out','needs_review'} or run.override_by:raise DomainError('EVALUATION_OVERRIDE_BLOCKED',409,'评估已变化或不满足人工继续前提')
                 run.override_by=fresh.user_id;run.override_reason=reason.strip();run.invitation_mode='manual_only';run.state='matching'
                 uow.session.add(RecruitmentEvent(application_id=run.application_id,event_type='evaluation.override',actor_id=fresh.user_id,content={'evaluation_id':run.id,'reason':reason.strip(),'decision':'continue','original_result':run.screening_result}))
                 self.audit(uow,fresh,'evaluation.override','application',run.application_id,{'reason':reason.strip(),'source_id':run.id});self._match_request(uow,run)
@@ -157,8 +159,8 @@ class EvaluationService(HrServiceBase):
         with self.uow_factory() as uow:
             run=uow.session.get(EvaluationRun,run_id)
             if run is None:raise DomainError('RESOURCE_NOT_FOUND',404,'评估不存在')
-            self.authorize(uow,actor,'evaluation.read',self._scope(uow,run.application_id))
+            self.authorize(uow,actor,'evaluation.read',self.resource_scope(uow,run.application_id))
             details=list(uow.session.scalars(select(ScreeningDetail).where(ScreeningDetail.evaluation_run_id==run.id).order_by(ScreeningDetail.id)))
             events=list(uow.session.scalars(select(RecruitmentEvent).where(RecruitmentEvent.application_id==run.application_id,RecruitmentEvent.event_type=='evaluation.override').order_by(RecruitmentEvent.id)))
             match=uow.session.scalar(select(MatchResult).where(MatchResult.evaluation_run_id==run.id))
-            return EvaluationDetail(**self._view(uow,run).model_dump(),screening_context=deepcopy(run.screening_context),conditions=[{'key':d.condition_key,'required':d.required,'expected':d.expected,'actual':d.actual,'result':d.result,'evidence':d.evidence,'reason_code':run.screening_context.get('condition_reasons',{}).get(d.condition_key)} for d in details],match={k:getattr(match,k) for k in ('state','total_score','dimension_scores','strengths','gaps','evidence')} if match else None,override_events=[{'id':str(e.id),'actor_id':str(e.actor_id),**e.content} for e in events if e.content.get('evaluation_id')==run.id])
+            return EvaluationDetail(**self._view(uow,run).model_dump(),screening_context=deepcopy(run.screening_context),conditions=[{'key':d.condition_key,'required':d.required,'expected':d.expected,'actual':d.actual,'result':d.result,'evidence':d.evidence,'reason_code':run.screening_context.get('condition_reasons',{}).get(d.condition_key)} for d in details],match=EvaluationMatchView(state=match.state,total_score=f'{match.total_score:.2f}' if match.total_score is not None else None,dimensions=match.dimension_scores,strengths=match.strengths,gaps=match.gaps,evidence=match.evidence) if match else None,override_events=[{'id':str(e.id),'actor_id':str(e.actor_id),**e.content} for e in events if e.content.get('evaluation_id')==run.id])

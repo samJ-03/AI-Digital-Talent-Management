@@ -218,7 +218,7 @@ class CandidateService(HrServiceBase):
             result=self.execute(actor,'talent.write',scope,'talent.correct',{'candidate_id':candidate_id,**cmd.model_dump(mode='json')},command,response_permission='talent.read')
         with self.uow_factory() as uow:
             self.authorize(uow,actor,'talent.read',scope)
-            return self._resume_view(uow.session.get(ResumeVersion,result.entity_id))
+            return self.resume_view(uow.session.get(ResumeVersion,result.entity_id))
 
     def _correct_facts(self,original,changes,actor_id):
         """仅允许替换现有事实叶子或整个事实列表，重新验证结构和证据。"""
@@ -252,7 +252,8 @@ class CandidateService(HrServiceBase):
         try:return ResumeFacts.model_validate(facts).model_dump(mode='json')
         except (ValidationError,TypeError,ValueError):raise DomainError('INVALID_CORRECTION',422,'修订字段类型或证据无效') from None
 
-    def _resume_view(self,row):
+    def resume_view(self,row):
+        """投影已授权简历快照；调用方负责权限和事务，不在此处另开Session。"""
         return ResumeVersionView(id=str(row.id),candidate_id=str(row.candidate_id),file_id=str(row.file_id),version_no=row.version_no,parent_version_id=str(row.parent_version_id) if row.parent_version_id else None,raw_text=row.raw_text,structured_data=row.structured_data,field_sources=row.field_sources,parser_revision=row.parser_revision,state=row.state,change_reason=row.change_reason,version=row.row_version)
 
     def archive(self,actor,candidate_id: int,reason: str,expected_version: int) -> TalentView:
