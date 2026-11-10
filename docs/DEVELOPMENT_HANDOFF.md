@@ -1,5 +1,7 @@
 # 开发记录与断点续接
 
+> 最新检查点（2026-11-10 T16）：人工去重、历史身份/应聘关系合并完成；定向14、完整314通过，独立审查无阻断项。下一步T17画像与pipeline.resume消费者。见docs/DUPLICATE_RESOLUTION_CONTRACT.md及artifacts/t16-verification.md。无真实模型调用、外发邮件或生产部署。
+
 > 最新检查点（2026-11-10）：T15人才建档、邮箱门槛、不可变修订及resume.parse处理器完成；定向20、完整300通过，来源变化审查问题已修复。下一步T16人工去重，再T17画像。详见docs/CANDIDATE_MATERIALIZATION_CONTRACT.md和artifacts/t15-verification.md。未接入OCR、未发送外部邮件、未进行生产部署。
 
 更新：2026-11-09；状态：T01～T12及T13文本/提取子任务、T14导入受理已验证；最新完整280通过，下一步T15人才建档。
