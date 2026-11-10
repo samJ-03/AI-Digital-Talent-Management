@@ -1326,7 +1326,7 @@ TalentSearchService.recommend(self, actor: ActorContext, job_id: int, query: Tal
 
 **类型与规则：** VectorRecord={key,entity_id,entity_type,scope,department_id?,content_hash,vector}; VectorHit={entity_id,relevance}; IndexEntityRef={type,id}; IndexSyncResult={state,record_id}; TalentFilter与TalentSearchQuery见05；候选共享profile向量与知识chunk按类型/权限隔离。
 
-- [ ] **T20.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T20.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_index_down_503_not_empty(hr_client, milvus_down, csrf_headers):
@@ -1336,15 +1336,15 @@ def test_index_down_503_not_empty(hr_client, milvus_down, csrf_headers):
     assert response.json()["code"] == "SEMANTIC_INDEX_UNAVAILABLE"
 ~~~
 
-- [ ] **T20.1.1** test_milvus_real_roundtrip：真实SDK写入召回。
-- [ ] **T20.1.2** test_stale_vector_filtered：归档/merged/旧版本召回后MySQL过滤。
-- [ ] **T20.1.3** test_index_down_503_not_empty：索引故障明确不可用。
-- [ ] **T20.1.4** test_private_evidence_not_indexed：共享向量无私有评价。
-- [ ] **T20.1.5** test_new_embedding_dimension_new_collection：换模型维度不混写。
+- [x] **T20.1.1** test_milvus_real_roundtrip：真实SDK写入召回。
+- [x] **T20.1.2** test_stale_vector_filtered：归档/merged/旧版本召回后MySQL过滤。
+- [x] **T20.1.3** test_index_down_503_not_empty：索引故障明确不可用。
+- [x] **T20.1.4** test_private_evidence_not_indexed：共享向量无私有评价。
+- [x] **T20.1.5** test_new_embedding_dimension_new_collection：换模型维度不混写。
 
-- [ ] **T20.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T20.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T20.4 验证GREEN及异常。** 执行：
+- [x] **T20.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T20.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T20.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_semantic_search.py -q
@@ -1352,8 +1352,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_se
 
 预期：测试全部PASS、构建成功、退出0。完成条件：自然语言找人真实可用；top_k/阈值可配置；相关度不当岗位分；索引失败可重建。
 
-- [ ] **T20.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t20-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T20.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T20.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t20-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T20.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/search/milvus_store.py' 'backend/app/search/index_service.py' 'backend/app/search/talent_search.py' 'backend/tests/integration/test_semantic_search.py' 'backend/app/talents/router.py'
@@ -1383,7 +1383,7 @@ MatchEvidenceValidator.validate(self, draft: MatchDraft, evidence: list[Evidence
 
 **类型与规则：** MatchWeights={skills,experience,responsibilities}和100；DimensionScore={name,score?,evidence}; MatchDraft={dimensions,strengths,gaps,evidence}; MatchValidation={valid,unknown_dimensions,reasons}; MatchView见05。模型提出分项，服务端Decimal加权，禁止余弦×100。
 
-- [ ] **T21.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T21.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_weighted_50_35_15(scorer, dimension_scores_80_60_100, default_weights):
@@ -1391,14 +1391,14 @@ def test_weighted_50_35_15(scorer, dimension_scores_80_60_100, default_weights):
     assert result == Decimal("76.00")
 ~~~
 
-- [ ] **T21.1.1** test_weighted_50_35_15：分项80/60/100结果76.00。
-- [ ] **T21.1.2** test_unknown_dimension_blocks_invite：无证据维度unknown，不补0/100。
-- [ ] **T21.1.3** test_match_bound_to_versions：结果引用本run输入版本。
-- [ ] **T21.1.4** test_ai_failure_needs_review：模型失败不视作不合格。
+- [x] **T21.1.1** test_weighted_50_35_15：分项80/60/100结果76.00。
+- [x] **T21.1.2** test_unknown_dimension_blocks_invite：无证据维度unknown，不补0/100。
+- [x] **T21.1.3** test_match_bound_to_versions：结果引用本run输入版本。
+- [x] **T21.1.4** test_ai_failure_needs_review：模型失败不视作不合格。
 
-- [ ] **T21.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T21.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T21.4 验证GREEN及异常。** 执行：
+- [x] **T21.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T21.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T21.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/unit/test_match_scoring.py tests/integration/test_match_pipeline.py -q
@@ -1406,8 +1406,8 @@ python scripts/compose.py exec -T api python -m pytest tests/unit/test_match_sco
 
 预期：测试全部PASS、构建成功、退出0。完成条件：硬筛未通过不触发自动匹配邀考；手动覆盖可以请求匹配，但邀请仍须显式动作。
 
-- [ ] **T21.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t21-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T21.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T21.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t21-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T21.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/evaluation/match_service.py' 'backend/app/evaluation/match_scoring.py' 'backend/tests/unit/test_match_scoring.py' 'backend/tests/integration/test_match_pipeline.py'

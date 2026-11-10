@@ -27,6 +27,12 @@ HANDLERS={'system.verify':verify_runtime,'mail.test':MailTestHandler(make_uow,ma
 from app.evaluation.service import EvaluationService
 from app.evaluation.worker import EvaluationHandler
 HANDLERS['application.evaluate']=EvaluationHandler(EvaluationService(make_uow))
+from app.evaluation.match_service import MatchService
+from app.evaluation.match_worker import MatchHandler
+from app.search.index_service import IndexService
+from app.search.worker import ProfileIndexHandler
+HANDLERS['application.match']=MatchHandler(MatchService(make_uow))
+HANDLERS['profile.index']=ProfileIndexHandler(IndexService(make_uow))
 from app.ingestion.worker import ResumeParseHandler
 from app.files.service import FileService
 from app.files.storage import S3FileStore

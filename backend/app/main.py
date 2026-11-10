@@ -28,6 +28,7 @@ from app.talents.merge_router import router as duplicate_router
 from app.talents.profile_router import router as profile_router
 from app.evaluation.router import router as evaluation_router
 from app.recruitment.router import router as recruitment_router
+from app.search.router import router as search_router
 from app.files.storage import S3FileStore
 from app.files.service import FileService
 
@@ -63,6 +64,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(paper_router)
     app.include_router(jobs_router)
     app.include_router(evaluation_router)
+    app.include_router(search_router)
     app.include_router(recruitment_router)
     app.include_router(mail_router)
 

@@ -11,3 +11,13 @@
 当前本地SMTP只允许Mailpit，捕获测试邮件而不对外投递。企业SMTP需要配置主机白名单、真实认证、TLS和HTTPS候选人入口；本次仓库上传不包含企业SMTP接入或生产部署。
 
 配置类别包括：运行环境；基础服务凭据；数据库/Redis连接；MinIO及上传限制；会话命名空间与JSON格式trusted origins；加密主密钥；可选官方模型Key；JSON格式SMTP主机白名单。所有这些配置均在Settings或Compose中有实际读取，未加入无法生效的占位配置。
+
+## T20 语义检索参数
+
+|变量|默认值|用途|
+|---|---|---|
+|TALENT_MILVUS_URI|http://milvus:19530|本项目Milvus SDK连接地址|
+|TALENT_SEMANTIC_TOP_K|200|召回上限1～1000，逐条MySQL复验后再按page_size截取|
+|TALENT_SEMANTIC_MIN_RELEVANCE|0.0|余弦阈值-1～1，与岗位匹配分无关|
+
+两个.env模板保持一致，Compose将这些变量传给API/Worker/Scheduler。仅配置地址不会启用付费模型。embedding和match由管理员选用已验证模型、发布匹配schema并明确启用；说明见SEMANTIC_SEARCH_AND_MATCH_CONTRACT.md。

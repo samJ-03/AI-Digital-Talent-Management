@@ -14,7 +14,7 @@ from app.core.idempotency import ResultRef
 from app.core.uow import SqlAlchemyUow,make_uow
 from app.runtime.models import BackgroundJob,OutboxEvent
 
-JOB_TYPES=frozenset({'system.verify','resume.parse','profile.build','application.evaluate','profile.index','exam.grade','notification.send','mail.test','question.generate','knowledge.index'})
+JOB_TYPES=frozenset({'system.verify','resume.parse','profile.build','application.evaluate','application.match','profile.index','exam.grade','notification.send','mail.test','question.generate','knowledge.index'})
 ENTITY_TYPES=frozenset({'system','candidate','resume_version','candidate_profile','import_batch','import_item','application','exam_attempt','notification','mail_config','knowledge_document','question_bank','paper_version'})
 REF_IDS=frozenset({'candidate_id','resume_version_id','profile_id','job_id','job_version_id','evaluation_id','attempt_id','notification_id','mail_config_id','model_config_id','prompt_version_id','file_id','document_id','bank_id','paper_version_id','import_item_id','batch_id'})
 REF_REVISIONS=frozenset({'submission_revision','parser_revision','profile_revision','embedding_revision','review_revision'})

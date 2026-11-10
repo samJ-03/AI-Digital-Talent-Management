@@ -1,6 +1,6 @@
 """公共基础设施：加载TALENT_环境配置并校验生产环境约束。"""
 from typing import Literal
-from pydantic import SecretStr, model_validator
+from pydantic import SecretStr, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     deepseek_api_key: SecretStr | None = None
     dashscope_api_key: SecretStr | None = None
     encryption_key: SecretStr | None = None
+    milvus_uri: str = 'http://milvus:19530'
+    semantic_top_k: int = Field(default=200,ge=1,le=1000)
+    semantic_min_relevance: float = Field(default=0.0,ge=-1,le=1)
     minio_endpoint: str = 'minio:9000'
     minio_user: SecretStr | None = None
     minio_password: SecretStr | None = None

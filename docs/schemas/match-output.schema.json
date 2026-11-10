@@ -1,0 +1,157 @@
+{
+  "$defs": {
+    "DimensionScore": {
+      "additionalProperties": false,
+      "description": "缺证据维度使用None，不能以零分代替未知。",
+      "properties": {
+        "name": {
+          "enum": [
+            "skills",
+            "experience",
+            "responsibilities"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 100,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "DimensionScore",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "description": "Evidence：模型配置与受控AI执行中的输入输出数据契约。",
+      "properties": {
+        "source_type": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Source Type",
+          "type": "string"
+        },
+        "source_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "locator": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        },
+        "quote": {
+          "maxLength": 20000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_type",
+        "source_id",
+        "locator",
+        "quote"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "MatchClaim": {
+      "additionalProperties": false,
+      "description": "优势或差距必须携带可复验的事实引文。",
+      "properties": {
+        "text": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "evidence"
+      ],
+      "title": "MatchClaim",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "模型只能提出维度，不接收或信任模型生成的总分。",
+  "properties": {
+    "dimensions": {
+      "items": {
+        "$ref": "#/$defs/DimensionScore"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Dimensions",
+      "type": "array"
+    },
+    "strengths": {
+      "items": {
+        "$ref": "#/$defs/MatchClaim"
+      },
+      "maxItems": 20,
+      "title": "Strengths",
+      "type": "array"
+    },
+    "gaps": {
+      "items": {
+        "$ref": "#/$defs/MatchClaim"
+      },
+      "maxItems": 20,
+      "title": "Gaps",
+      "type": "array"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Citations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "dimensions",
+    "strengths",
+    "gaps",
+    "citations"
+  ],
+  "title": "MatchDraft",
+  "type": "object"
+}
