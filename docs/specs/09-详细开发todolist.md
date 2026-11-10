@@ -1209,7 +1209,7 @@ ExperienceCalculator.relevant_years(self, employment: list[Employment], as_of: d
 
 **类型与规则：** ScreeningReport={result:pass|fail|unknown,details:[{condition_key,required,expected,actual,result,evidence}]}; ResumeFacts来自结构化简历；MajorResolution={canonical?,confidence,needs_review}; 重叠经历按区间并集，未知不是0。
 
-- [ ] **T18.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T18.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_preferred_missing_not_fail(engine, complete_required_facts, rules_with_missing_preferred):
@@ -1217,15 +1217,15 @@ def test_preferred_missing_not_fail(engine, complete_required_facts, rules_with_
     assert report.result == "pass"
 ~~~
 
-- [ ] **T18.1.1** test_required_truth_table：任一required unmet→fail；否则有unknown→unknown；全met→pass。
-- [ ] **T18.1.2** test_preferred_missing_not_fail：加分条件缺失不硬拒。
-- [ ] **T18.1.3** test_overlapping_employment_no_double_count：重叠日期按并集。
-- [ ] **T18.1.4** test_age_manual_only：年龄不参与默认自动评分。
-- [ ] **T18.1.5** test_unknown_major_requires_review：模糊专业不能硬通过。
+- [x] **T18.1.1** test_required_truth_table：任一required unmet→fail；否则有unknown→unknown；全met→pass。
+- [x] **T18.1.2** test_preferred_missing_not_fail：加分条件缺失不硬拒。
+- [x] **T18.1.3** test_overlapping_employment_no_double_count：重叠日期按并集。
+- [x] **T18.1.4** test_age_manual_only：年龄不参与默认自动评分。
+- [x] **T18.1.5** test_unknown_major_requires_review：模糊专业不能硬通过。
 
-- [ ] **T18.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T18.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T18.4 验证GREEN及异常。** 执行：
+- [x] **T18.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T18.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T18.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/unit/test_screening_rules.py -q
@@ -1233,8 +1233,8 @@ python scripts/compose.py exec -T api python -m pytest tests/unit/test_screening
 
 预期：测试全部PASS、构建成功、退出0。完成条件：纯函数规则不调用模型/数据库；测试覆盖学历、专业、年限、技能、证书和缺失/冲突信息。
 
-- [ ] **T18.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t18-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T18.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T18.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t18-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T18.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/evaluation/rules.py' 'backend/app/evaluation/normalization.py' 'backend/app/evaluation/schemas.py' 'backend/tests/unit/test_screening_rules.py'
