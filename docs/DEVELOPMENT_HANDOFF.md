@@ -1,5 +1,7 @@
 # 开发记录与断点续接
 
+> 最新检查点（2026-11-10 T20/T21）：真实Milvus语义索引、权限过滤检索及岗位证据匹配完成；定向30、完整438通过，独立审查2项Important已RED→GREEN修复。下一步T22邀请资格，再T23投递。见docs/SEMANTIC_SEARCH_AND_MATCH_CONTRACT.md及artifacts/t20-verification.md。未自动启用模型流程、未调用付费模型、未外发邮件。
+
 > 最新检查点（2026-11-10 T19）：应聘关系、冻结评估、人工继续及首次等待恢复完成；定向15、完整408通过，独立审查1项Important已RED→GREEN修复。下一步T20向量索引，再T21岗位匹配。见docs/EVALUATION_SNAPSHOTS_CONTRACT.md及artifacts/t19-verification.md。未调用真实模型或外发招聘邮件。
 
 > 最新检查点（2026-11-10 T18）：确定性三态硬筛与证据规范化完成；定向57、完整393通过，独立审查2项Important已RED→GREEN修复。下一步T19应聘评估与人工覆盖。见docs/SCREENING_RULES_CONTRACT.md及artifacts/t18-verification.md。本轮无新API、模型调用或招聘状态变更。
