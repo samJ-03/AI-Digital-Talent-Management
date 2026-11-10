@@ -1040,7 +1040,7 @@ handle_resume_parse(job_id: int) -> ResultRef
 
 **类型与规则：** MaterializationResult={candidate_id,resume_version_id,application_id?,state,next_task?}; ContactsPatch={email?,phone?,reason}; ResumeCorrection={base_resume_version_id,changes,reason}; CanonicalIdentity={root_id,alias_ids}; ResumeVersionView按04字段但敏感内容受HR权限。
 
-- [ ] **T15.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
+- [x] **T15.1 建立失败场景与测试数据。** 在测试文件写入代表性断言，并补齐下面各场景；fixture不能返回固定成功结论。
 
 ~~~python
 def test_parsed_without_email_stays_pending(candidate_service, import_item, extracted_without_email):
@@ -1049,15 +1049,15 @@ def test_parsed_without_email_stays_pending(candidate_service, import_item, extr
     assert result.next_task is None
 ~~~
 
-- [ ] **T15.1.1** test_parsed_without_email_stays_pending：成功留库但不筛选邀考。
-- [ ] **T15.1.2** test_email_completion_resumes_pipeline：补齐后只继续一次。
-- [ ] **T15.1.3** test_same_name_not_merge：同名不自动合并。
-- [ ] **T15.1.4** test_correction_new_version：原解析结果仍可查。
-- [ ] **T15.1.5** test_canonical_cycle_rejected：别名环拒绝。
+- [x] **T15.1.1** test_parsed_without_email_stays_pending：成功留库但不筛选邀考。
+- [x] **T15.1.2** test_email_completion_resumes_pipeline：补齐后只继续一次。
+- [x] **T15.1.3** test_same_name_not_merge：同名不自动合并。
+- [x] **T15.1.4** test_correction_new_version：原解析结果仍可查。
+- [x] **T15.1.5** test_canonical_cycle_rejected：别名环拒绝。
 
-- [ ] **T15.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
-- [ ] **T15.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
-- [ ] **T15.4 验证GREEN及异常。** 执行：
+- [x] **T15.2 验证RED。** 运行下列相关测试，确认未实现行为引起预期断言失败并记录原因；环境/fixture错误先修复，不算有效RED。运维任务使用故障fixture验证阻塞，不给纯文档写镜像测试。
+- [x] **T15.3 最小实现。** 按上述签名逐函数实现及注册；只落实本任务规则，模型以04、HTTP以05为准。跨任务修改同步Interfaces、测试与附录B。
+- [x] **T15.4 验证GREEN及异常。** 执行：
 
 ~~~text
 python scripts/compose.py exec -T api python -m pytest tests/integration/test_candidate_materialization.py -q
@@ -1065,8 +1065,8 @@ python scripts/compose.py exec -T api python -m pytest tests/integration/test_ca
 
 预期：测试全部PASS、构建成功、退出0。完成条件：邮箱验证是格式/联系人完整性门槛，邮箱控制权由候选人核验；未决重复保持duplicate_review；同文件哈希不等于同一个人。
 
-- [ ] **T15.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t15-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
-- [ ] **T15.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
+- [x] **T15.5 保存证据并审阅。** 记录实际版本、命令、结果、资源引用和未解决项至`artifacts/t15-verification.md`。秘密和真实候选人资料不入报告；环境/质量未满足标blocked。
+- [x] **T15.6 提交改动。** 在R已初始化Git且确认未混入用户改动后，仅暂存本任务文件；本地报告和secret默认不入Git。
 
 ~~~text
 git add -- 'backend/app/talents/candidate_service.py' 'backend/app/talents/identity_resolver.py' 'backend/app/ingestion/worker.py' 'backend/app/talents/router.py' 'backend/app/talents/schemas.py' 'backend/tests/integration/test_candidate_materialization.py'

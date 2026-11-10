@@ -24,6 +24,15 @@ from app.core.secrets import SecretCipher
 from app.core.uow import make_uow
 mail_cipher=SecretCipher(settings.encryption_key.get_secret_value()) if settings.encryption_key else None
 HANDLERS={'system.verify':verify_runtime,'mail.test':MailTestHandler(make_uow,mail_cipher,settings)}
+from app.ingestion.worker import ResumeParseHandler
+from app.files.service import FileService
+from app.files.storage import S3FileStore
+from app.ai_runtime.gateway import ModelGateway
+if settings.minio_user and settings.minio_password:
+    resume_store=S3FileStore.from_settings(settings)
+    HANDLERS['resume.parse']=ResumeParseHandler(
+        FileService(resume_store,make_uow,max_file_bytes=settings.max_file_bytes,max_pages=settings.max_file_pages),
+        ModelGateway(make_uow,mail_cipher),make_uow)
 
 @celery_app.task(name='talent.execute_job')
 def execute_job(job_id: int) -> None:

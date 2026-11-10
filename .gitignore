@@ -8,6 +8,7 @@ artifacts/
 .env.*
 !.env.example
 .execution/
+.superpowers/
 *.tsbuildinfo
 
 # 本地秘密、导出数据和开发工具缓存

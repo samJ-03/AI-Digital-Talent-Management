@@ -1,6 +1,7 @@
 """持久后台任务与Outbox：管理任务入队、租约、重试和终态转换。"""
 from __future__ import annotations
 from dataclasses import dataclass
+from contextlib import nullcontext
 from datetime import datetime,timedelta,timezone
 import re
 from typing import Callable
@@ -128,7 +129,7 @@ class BackgroundJobService:
         if job.lease_until<=utc_naive(self.clock.now()):
             raise DomainError('STALE_JOB_LEASE',409,'任务租约已失效')
         failure=isinstance(result,TerminalJobFailure)
-        safe={'SMTP_DELIVERY_UNKNOWN','SMTP_TEST_FAILED','MAIL_CONFIG_DISABLED','MAIL_TEST_EXPIRED'}
+        safe={'SMTP_DELIVERY_UNKNOWN','SMTP_TEST_FAILED','MAIL_CONFIG_DISABLED','MAIL_TEST_EXPIRED','INVALID_OUTPUT','DEPENDENCY_UNAVAILABLE'}
         job.state='failed' if failure else 'succeeded'
         job.error_code=result.error_code if failure and result.error_code in safe else ('HANDLER_FAILED' if failure else None)
         job.lease_owner=None;job.lease_until=None;job.next_run_at=None
@@ -187,7 +188,9 @@ class JobRunner:
             return
         try:
             callback=handler.prepare(lease) if hasattr(handler,'prepare') else handler
-            self.service.run_atomic(lease,callback)
+            # Identity serialization must include the outer commit, not just callback execution.
+            with handler.finalization_context() if hasattr(handler,'finalization_context') else nullcontext():
+                self.service.run_atomic(lease,callback)
         except Exception:
             # Never persist exception messages, raw model output, credentials or source material.
             try: self.service.fail(lease,'HANDLER_FAILED')

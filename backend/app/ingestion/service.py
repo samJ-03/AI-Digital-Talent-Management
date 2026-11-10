@@ -40,6 +40,8 @@ SAFE_ERRORS={
     'DEPENDENCY_UNAVAILABLE':'处理依赖暂不可用，可稍后重试',
     'INVALID_OUTPUT':'提取结果未通过校验，可重试或人工处理',
 }
+from app.ingestion.worker import PERMANENT
+SAFE_ERRORS.update(PERMANENT)
 
 class ImportService(HrServiceBase):
     """构造参数可降低批次上限；文件/页数上限沿用FileService配置。"""
@@ -143,7 +145,7 @@ class ImportService(HrServiceBase):
         for item in items:
             task=latest.get(item.id);state=item.status;code=item.error_code
             if state!='parsed' and task:
-                if task.state in {'failed','cancelled'}: state='failed';code=task.error_code or 'HANDLER_FAILED'
+                if task.state in {'failed','cancelled'}: state='failed';code=item.error_code if item.error_code in SAFE_ERRORS else task.error_code or 'HANDLER_FAILED'
                 elif task.state=='running': state='parsing'
             code=code if code in SAFE_ERRORS else ('HANDLER_FAILED' if state=='failed' else None)
             file=stored.get(item.file_id)
